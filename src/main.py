@@ -5,8 +5,8 @@ from checks.firewall_check import get_firewall_info
 from checks.defender_check import get_defender_info
 from checks.windows_update_check import get_windows_update_info
 from checks.open_ports_check import get_open_ports_info
-from report.markdown_report import save_markdown_report
 from checks.bitlocker_check import get_bitlocker_info
+from report.markdown_report import save_markdown_report
 
 
 def print_section(title, data):
@@ -20,6 +20,43 @@ def print_section(title, data):
 
     for key, value in data.items():
         print(f"{key}: {value}")
+
+
+def create_overall_summary(sections):
+    """
+    Erstellt eine Gesamtbewertung aus allen Diagnosebereichen.
+    Es werden die Bewertungen OK, WARNUNG, HINWEIS und KRITISCH gezählt.
+    """
+
+    summary = {
+        "OK": 0,
+        "HINWEIS": 0,
+        "WARNUNG": 0,
+        "KRITISCH": 0,
+    }
+
+    for title, data in sections:
+        rating = data.get("Bewertung")
+
+        if rating in summary:
+            summary[rating] += 1
+
+    if summary["KRITISCH"] > 0:
+        overall_status = "KRITISCH"
+    elif summary["WARNUNG"] > 0:
+        overall_status = "WARNUNG"
+    elif summary["HINWEIS"] > 0:
+        overall_status = "HINWEIS"
+    else:
+        overall_status = "OK"
+
+    return {
+        "OK": summary["OK"],
+        "HINWEIS": summary["HINWEIS"],
+        "WARNUNG": summary["WARNUNG"],
+        "KRITISCH": summary["KRITISCH"],
+        "Gesamtstatus": overall_status,
+    }
 
 
 def main():
@@ -52,6 +89,10 @@ def main():
         ("Offene Ports Prüfung", open_ports_info),
         ("BitLocker Prüfung", bitlocker_info),
     ]
+
+    # Gesamtbewertung erstellen
+    overall_summary = create_overall_summary(sections)
+    sections.append(("Gesamtbewertung", overall_summary))
 
     # Ergebnisse in der Konsole anzeigen
     for title, data in sections:
