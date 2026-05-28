@@ -69,3 +69,26 @@ Erstellt am: 28.05.2026 17:30:00
 | Letztes installiertes Update | HotFixID: KBxxxxxxx<br>InstalledOn: 27.05.2026 00:00:00                                                             |
 | Hinweis                      | Windows Update Dienst läuft aktuell nicht dauerhaft. Das kann normal sein, da der Dienst bei Bedarf gestartet wird. |
 | Bewertung                    | OK                                                                                                                  |
+
+## Offene Ports Prüfung
+
+| Prüfung                            | Ergebnis                                                                                                                                         |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Anzahl offener TCP-Listening-Ports | 38                                                                                                                                               |
+| Nur lokal erreichbare Ports        | 16                                                                                                                                               |
+| Im Netzwerk erreichbare Ports      | 22                                                                                                                                               |
+| Auffällige Standardports           | 135 (Windows RPC) → svchost [PID: xxxx], 139 (NetBIOS) → System [PID: x], 445 (SMB) → System [PID: x], 3306 (MySQL/MariaDB) → mysqld [PID: xxxx] |
+| Bewertung                          | WARNUNG                                                                                                                                          |
+| Hinweis                            | Port 3306 ist häufig MySQL/MariaDB. Der Dienst sollte nicht unnötig im Netzwerk erreichbar sein.                                                 |
+
+## BitLocker Prüfung
+
+| Prüfung                    | Ergebnis                                                                                     |
+| -------------------------- | -------------------------------------------------------------------------------------------- |
+| Laufwerk                   | C:                                                                                           |
+| Verschlüsselungsstatus     | Nicht ermittelbar                                                                            |
+| Schutzstatus               | Nicht ermittelbar                                                                            |
+| Verschlüsselung in Prozent | Nicht ermittelbar                                                                            |
+| Sperrstatus                | Nicht ermittelbar                                                                            |
+| Bewertung                  | HINWEIS                                                                                      |
+| Hinweis                    | BitLocker-Informationen konnten wegen fehlender Administratorrechte nicht ausgelesen werden. |
