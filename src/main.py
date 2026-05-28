@@ -1,7 +1,7 @@
 from checks.system_info import get_system_info
 from checks.network_check import get_network_info
 from checks.disk_check import get_disk_info
-
+from checks.firewall_check import get_firewall_info
 
 def print_section(title, data):
     """
@@ -36,6 +36,10 @@ def main():
     # Speicherplatz prüfen und anzeigen
     disk_info = get_disk_info()
     print_section("Speicherplatzprüfung", disk_info)
+
+    # Windows-Firewall prüfen und anzeigen
+    firewall_info = get_firewall_info()
+    print_section("Firewallprüfung", firewall_info)
 
 
 if __name__ == "__main__":
