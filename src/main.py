@@ -1,5 +1,6 @@
 from checks.system_info import get_system_info
 from checks.network_check import get_network_info
+from checks.disk_check import get_disk_info
 
 
 def print_section(title, data):
@@ -31,6 +32,10 @@ def main():
     # Netzwerkinformationen auslesen und anzeigen
     network_info = get_network_info()
     print_section("Netzwerkprüfung", network_info)
+
+    # Speicherplatz prüfen und anzeigen
+    disk_info = get_disk_info()
+    print_section("Speicherplatzprüfung", disk_info)
 
 
 if __name__ == "__main__":
