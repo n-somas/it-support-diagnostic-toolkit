@@ -6,6 +6,7 @@ from checks.defender_check import get_defender_info
 from checks.windows_update_check import get_windows_update_info
 from checks.open_ports_check import get_open_ports_info
 from report.markdown_report import save_markdown_report
+from checks.bitlocker_check import get_bitlocker_info
 
 
 def print_section(title, data):
@@ -38,6 +39,7 @@ def main():
     defender_info = get_defender_info()
     windows_update_info = get_windows_update_info()
     open_ports_info = get_open_ports_info()
+    bitlocker_info = get_bitlocker_info()
 
     # Ergebnisse als Abschnitte sammeln
     sections = [
@@ -48,6 +50,7 @@ def main():
         ("Defenderprüfung", defender_info),
         ("Windows Update Prüfung", windows_update_info),
         ("Offene Ports Prüfung", open_ports_info),
+        ("BitLocker Prüfung", bitlocker_info),
     ]
 
     # Ergebnisse in der Konsole anzeigen
