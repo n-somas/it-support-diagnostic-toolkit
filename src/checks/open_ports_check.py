@@ -1,6 +1,23 @@
 import subprocess
 
 
+SUSPICIOUS_PORTS = {
+    21: "FTP",
+    22: "SSH",
+    23: "Telnet",
+    80: "HTTP",
+    135: "Windows RPC",
+    139: "NetBIOS",
+    445: "SMB",
+    1433: "Microsoft SQL Server",
+    3306: "MySQL/MariaDB",
+    3389: "Remote Desktop",
+    5432: "PostgreSQL",
+    5900: "VNC",
+    8080: "HTTP Alternative",
+}
+
+
 def run_powershell_command(command):
     """
     Führt einen PowerShell-Befehl aus und gibt die Ausgabe zurück.
@@ -23,74 +40,191 @@ def run_powershell_command(command):
     return result.stdout.strip()
 
 
-def get_listening_tcp_ports():
+def get_tcp_listening_connections():
     """
-    Ermittelt lokal lauschende TCP-Ports.
-    Das ist relevant, um zu sehen, welche Dienste auf dem System Verbindungen annehmen.
+    Ermittelt lokal lauschende TCP-Verbindungen als CSV.
+    CSV ist besser als Format-Table, weil die Daten danach sauber verarbeitet werden können.
     """
 
     command = (
         "Get-NetTCPConnection -State Listen | "
-        "Select-Object -Property LocalAddress,LocalPort,OwningProcess | "
+        "Select-Object LocalAddress,LocalPort,OwningProcess | "
         "Sort-Object LocalPort | "
-        "Format-Table -AutoSize"
+        "ConvertTo-Csv -NoTypeInformation"
     )
 
     output = run_powershell_command(command)
 
-    if output:
-        return output
+    if not output:
+        return []
 
-    return "Keine offenen TCP-Listening-Ports ermittelbar"
+    lines = output.splitlines()
+
+    # Erste Zeile ist der CSV-Header
+    data_lines = lines[1:]
+
+    connections = []
+
+    for line in data_lines:
+        # Einfache CSV-Verarbeitung, weil PowerShell hier saubere Werte liefert:
+        # "0.0.0.0","135","2024"
+        parts = [part.strip().strip('"') for part in line.split(",")]
+
+        if len(parts) != 3:
+            continue
+
+        local_address = parts[0]
+        local_port = parts[1]
+        owning_process = parts[2]
+
+        try:
+            local_port = int(local_port)
+        except ValueError:
+            continue
+
+        connections.append(
+            {
+                "local_address": local_address,
+                "local_port": local_port,
+                "owning_process": owning_process,
+            }
+        )
+
+    return connections
 
 
-def count_listening_tcp_ports():
+def is_local_only_address(address):
     """
-    Zählt lokal lauschende TCP-Ports.
+    Prüft, ob eine Adresse nur lokal auf dem eigenen Gerät erreichbar ist.
     """
 
-    command = (
-        "(Get-NetTCPConnection -State Listen | "
-        "Measure-Object).Count"
-    )
-
-    output = run_powershell_command(command)
-
-    if output.isdigit():
-        return int(output)
-
-    return 0
+    return address in ["127.0.0.1", "::1"]
 
 
-def evaluate_open_ports(port_count):
+def is_network_reachable_address(address):
     """
-    Bewertet die Anzahl offener Listening-Ports grob.
-
-    Diese Bewertung ist bewusst vorsichtig:
-    Offene Ports sind nicht automatisch gefährlich.
-    Sie sollten aber im Support- oder Security-Kontext geprüft werden.
+    Prüft, ob eine Adresse potenziell im Netzwerk erreichbar ist.
     """
 
-    if port_count == 0:
-        return "OK"
+    if address in ["0.0.0.0", "::"]:
+        return True
 
-    if port_count <= 20:
+    if address.startswith("192.168."):
+        return True
+
+    if address.startswith("10."):
+        return True
+
+    if address.startswith("172."):
+        return True
+
+    return False
+
+
+def get_suspicious_ports(connections):
+    """
+    Prüft, ob bekannte sensible Ports offen sind.
+    """
+
+    found_ports = {}
+
+    for connection in connections:
+        port = connection["local_port"]
+
+        if port in SUSPICIOUS_PORTS:
+            found_ports[port] = SUSPICIOUS_PORTS[port]
+
+    return found_ports
+
+
+def format_suspicious_ports(suspicious_ports):
+    """
+    Formatiert auffällige Ports für die Konsolen- und Markdown-Ausgabe.
+    """
+
+    if not suspicious_ports:
+        return "Keine auffälligen Standardports erkannt"
+
+    formatted_ports = []
+
+    for port, service_name in suspicious_ports.items():
+        formatted_ports.append(f"{port} ({service_name})")
+
+    return ", ".join(formatted_ports)
+
+
+def evaluate_open_ports(network_reachable_count, suspicious_ports):
+    """
+    Bewertet die offenen Ports.
+
+    WARNUNG:
+    Wenn auffällige Standardports erkannt werden oder viele Ports im Netzwerk erreichbar sind.
+
+    HINWEIS:
+    Wenn nur wenige Ports im Netzwerk erreichbar sind.
+
+    OK:
+    Wenn keine im Netzwerk erreichbaren Ports erkannt werden.
+    """
+
+    if suspicious_ports:
+        return "WARNUNG"
+
+    if network_reachable_count > 10:
+        return "WARNUNG"
+
+    if network_reachable_count > 0:
         return "HINWEIS"
 
-    return "WARNUNG"
+    return "OK"
+
+
+def create_open_ports_note(suspicious_ports):
+    """
+    Erstellt einen verständlichen Hinweis für den Support-Bericht.
+    """
+
+    if 3306 in suspicious_ports:
+        return "Port 3306 ist häufig MySQL/MariaDB. Der Dienst sollte nicht unnötig im Netzwerk erreichbar sein."
+
+    if 445 in suspicious_ports:
+        return "Port 445 wird für SMB-Dateifreigaben verwendet. Der Dienst sollte nur in vertrauenswürdigen Netzwerken erreichbar sein."
+
+    if 3389 in suspicious_ports:
+        return "Port 3389 wird für Remote Desktop verwendet. Remote-Zugriff sollte besonders geschützt werden."
+
+    if suspicious_ports:
+        return "Es wurden auffällige Standardports erkannt. Diese sollten geprüft und dokumentiert werden."
+
+    return "Offene Ports sind nicht automatisch gefährlich, sollten aber nachvollziehbar sein."
 
 
 def get_open_ports_info():
     """
-    Prüft lokal offene TCP-Listening-Ports.
+    Prüft lokal offene TCP-Listening-Ports und bewertet sie.
     """
 
-    port_count = count_listening_tcp_ports()
-    listening_ports = get_listening_tcp_ports()
+    connections = get_tcp_listening_connections()
+
+    total_count = len(connections)
+
+    local_only_count = sum(
+        1 for connection in connections
+        if is_local_only_address(connection["local_address"])
+    )
+
+    network_reachable_count = sum(
+        1 for connection in connections
+        if is_network_reachable_address(connection["local_address"])
+    )
+
+    suspicious_ports = get_suspicious_ports(connections)
 
     return {
-        "Anzahl offener TCP-Listening-Ports": port_count,
-        "Offene TCP-Listening-Ports": listening_ports,
-        "Bewertung": evaluate_open_ports(port_count),
-        "Hinweis": "Offene Ports sind nicht automatisch gefährlich, sollten aber nachvollziehbar sein.",
+        "Anzahl offener TCP-Listening-Ports": total_count,
+        "Nur lokal erreichbare Ports": local_only_count,
+        "Im Netzwerk erreichbare Ports": network_reachable_count,
+        "Auffällige Standardports": format_suspicious_ports(suspicious_ports),
+        "Bewertung": evaluate_open_ports(network_reachable_count, suspicious_ports),
+        "Hinweis": create_open_ports_note(suspicious_ports),
     }
