@@ -59,15 +59,11 @@ def get_tcp_listening_connections():
         return []
 
     lines = output.splitlines()
-
-    # Erste Zeile ist der CSV-Header
     data_lines = lines[1:]
 
     connections = []
 
     for line in data_lines:
-        # Einfache CSV-Verarbeitung, weil PowerShell hier saubere Werte liefert:
-        # "0.0.0.0","135","2024"
         parts = [part.strip().strip('"') for part in line.split(",")]
 
         if len(parts) != 3:
@@ -79,6 +75,7 @@ def get_tcp_listening_connections():
 
         try:
             local_port = int(local_port)
+            owning_process = int(owning_process)
         except ValueError:
             continue
 
@@ -91,6 +88,25 @@ def get_tcp_listening_connections():
         )
 
     return connections
+
+
+def get_process_name(process_id):
+    """
+    Ermittelt den Prozessnamen zu einer Prozess-ID.
+    Wenn kein Prozess gefunden wird, wird ein neutraler Wert zurückgegeben.
+    """
+
+    command = (
+        f"Get-Process -Id {process_id} -ErrorAction SilentlyContinue | "
+        "Select-Object -ExpandProperty ProcessName"
+    )
+
+    output = run_powershell_command(command)
+
+    if output:
+        return output
+
+    return "Nicht ermittelbar"
 
 
 def is_local_only_address(address):
@@ -124,22 +140,30 @@ def is_network_reachable_address(address):
 def get_suspicious_ports(connections):
     """
     Prüft, ob bekannte sensible Ports offen sind.
+    Zusätzlich wird der zugehörige Prozessname ermittelt.
     """
 
     found_ports = {}
 
     for connection in connections:
         port = connection["local_port"]
+        process_id = connection["owning_process"]
 
         if port in SUSPICIOUS_PORTS:
-            found_ports[port] = SUSPICIOUS_PORTS[port]
+            process_name = get_process_name(process_id)
+
+            found_ports[port] = {
+                "service": SUSPICIOUS_PORTS[port],
+                "process_id": process_id,
+                "process_name": process_name,
+            }
 
     return found_ports
 
 
 def format_suspicious_ports(suspicious_ports):
     """
-    Formatiert auffällige Ports für die Konsolen- und Markdown-Ausgabe.
+    Formatiert auffällige Ports inklusive Dienst und Prozessname.
     """
 
     if not suspicious_ports:
@@ -147,8 +171,14 @@ def format_suspicious_ports(suspicious_ports):
 
     formatted_ports = []
 
-    for port, service_name in suspicious_ports.items():
-        formatted_ports.append(f"{port} ({service_name})")
+    for port, info in suspicious_ports.items():
+        service_name = info["service"]
+        process_name = info["process_name"]
+        process_id = info["process_id"]
+
+        formatted_ports.append(
+            f"{port} ({service_name}) → {process_name} [PID: {process_id}]"
+        )
 
     return ", ".join(formatted_ports)
 
@@ -156,15 +186,6 @@ def format_suspicious_ports(suspicious_ports):
 def evaluate_open_ports(network_reachable_count, suspicious_ports):
     """
     Bewertet die offenen Ports.
-
-    WARNUNG:
-    Wenn auffällige Standardports erkannt werden oder viele Ports im Netzwerk erreichbar sind.
-
-    HINWEIS:
-    Wenn nur wenige Ports im Netzwerk erreichbar sind.
-
-    OK:
-    Wenn keine im Netzwerk erreichbaren Ports erkannt werden.
     """
 
     if suspicious_ports:
