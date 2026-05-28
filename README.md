@@ -19,6 +19,7 @@ Das Tool prüft grundlegende System-, Netzwerk- und Sicherheitsparameter eines W
 - Zuordnung auffälliger Ports zu Prozessnamen
 - Prüfung des BitLocker-Status von Laufwerk C:
 - Erstellung eines Markdown-Supportberichts
+- Erstellung einer Gesamtbewertung aus allen Diagnosebereichen
 
 ## Aktuelle Diagnosebereiche
 
@@ -33,6 +34,7 @@ Das Tool prüft grundlegende System-, Netzwerk- und Sicherheitsparameter eines W
 | Offene Ports Prüfung | Anzahl offener TCP-Listening-Ports, Netzwerk-Erreichbarkeit, auffällige Standardports und Prozessnamen |
 | BitLocker Prüfung | Verschlüsselungsstatus, Schutzstatus, Verschlüsselungsgrad und Hinweis bei fehlenden Rechten |
 | Markdown-Report | Automatische Erstellung eines Support-Berichts als Markdown-Datei |
+| Gesamtbewertung | Zählt OK, HINWEIS, WARNUNG und KRITISCH und erstellt einen Gesamtstatus |
 
 ## Beispielausgabe
 
