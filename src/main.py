@@ -2,6 +2,7 @@ from checks.system_info import get_system_info
 from checks.network_check import get_network_info
 from checks.disk_check import get_disk_info
 from checks.firewall_check import get_firewall_info
+from checks.defender_check import get_defender_info
 
 def print_section(title, data):
     """
@@ -40,6 +41,10 @@ def main():
     # Windows-Firewall prüfen und anzeigen
     firewall_info = get_firewall_info()
     print_section("Firewallprüfung", firewall_info)
+
+    # Microsoft Defender prüfen und anzeigen
+    defender_info = get_defender_info()
+    print_section("Defenderprüfung", defender_info)
 
 
 if __name__ == "__main__":
