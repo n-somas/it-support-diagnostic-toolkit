@@ -4,6 +4,7 @@ from checks.disk_check import get_disk_info
 from checks.firewall_check import get_firewall_info
 from checks.defender_check import get_defender_info
 from checks.windows_update_check import get_windows_update_info
+from checks.open_ports_check import get_open_ports_info
 from report.markdown_report import save_markdown_report
 
 
@@ -36,6 +37,7 @@ def main():
     firewall_info = get_firewall_info()
     defender_info = get_defender_info()
     windows_update_info = get_windows_update_info()
+    open_ports_info = get_open_ports_info()
 
     # Ergebnisse als Abschnitte sammeln
     sections = [
@@ -45,6 +47,7 @@ def main():
         ("Firewallprüfung", firewall_info),
         ("Defenderprüfung", defender_info),
         ("Windows Update Prüfung", windows_update_info),
+        ("Offene Ports Prüfung", open_ports_info),
     ]
 
     # Ergebnisse in der Konsole anzeigen
