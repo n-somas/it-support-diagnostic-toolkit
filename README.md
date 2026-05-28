@@ -6,28 +6,33 @@ Das Tool prüft grundlegende System-, Netzwerk- und Sicherheitsparameter eines W
 
 ## Funktionen
 
-* Auslesen grundlegender Systeminformationen
-* Prüfung der aktiven Netzwerkverbindung
-* DNS-Auflösung testen
-* Ping-Test zu bekannten DNS-Servern
-* Speicherplatzprüfung von Laufwerk C:
-* Bewertung des freien Speicherplatzes
-* Prüfung der Windows-Firewall-Profile
-* Prüfung des Microsoft Defender Status
-* Prüfung des Windows Update Status
-* Erstellung eines Markdown-Supportberichts
+- Auslesen grundlegender Systeminformationen
+- Prüfung der aktiven Netzwerkverbindung
+- DNS-Auflösung testen
+- Ping-Test zu bekannten DNS-Servern
+- Speicherplatzprüfung von Laufwerk C:
+- Bewertung des freien Speicherplatzes
+- Prüfung der Windows-Firewall-Profile
+- Prüfung des Microsoft Defender Status
+- Prüfung des Windows Update Status
+- Prüfung lokal offener TCP-Listening-Ports
+- Zuordnung auffälliger Ports zu Prozessnamen
+- Prüfung des BitLocker-Status von Laufwerk C:
+- Erstellung eines Markdown-Supportberichts
 
 ## Aktuelle Diagnosebereiche
 
-| Bereich                | Beschreibung                                                                         |
-| ---------------------- | ------------------------------------------------------------------------------------ |
-| Systeminformationen    | Computername, Benutzername, Betriebssystem, Architektur, CPU-Kerne und Speicherplatz |
-| Netzwerkprüfung        | Aktive IP-Adresse, Standardgateway, Ping-Test und DNS-Auflösung                      |
-| Speicherplatzprüfung   | Freier Speicherplatz in GB und Prozent mit Bewertung                                 |
-| Firewallprüfung        | Status der Windows-Firewall für Domänen-, privates und öffentliches Profil           |
-| Defenderprüfung        | Echtzeitschutz, Antivirus-Status, Signaturversion und letztes Signaturupdate         |
-| Windows Update Prüfung | Windows Update Dienst, letztes installiertes Update und Bewertung                    |
-| Markdown-Report        | Automatische Erstellung eines Support-Berichts als Markdown-Datei                    |
+| Bereich | Beschreibung |
+|---|---|
+| Systeminformationen | Computername, Benutzername, Betriebssystem, Architektur, CPU-Kerne und Speicherplatz |
+| Netzwerkprüfung | Aktive IP-Adresse, Standardgateway, Ping-Test und DNS-Auflösung |
+| Speicherplatzprüfung | Freier Speicherplatz in GB und Prozent mit Bewertung |
+| Firewallprüfung | Status der Windows-Firewall für Domänen-, privates und öffentliches Profil |
+| Defenderprüfung | Echtzeitschutz, Antivirus-Status, Signaturversion und letztes Signaturupdate |
+| Windows Update Prüfung | Windows Update Dienst, letztes installiertes Update, Hinweis und Bewertung |
+| Offene Ports Prüfung | Anzahl offener TCP-Listening-Ports, Netzwerk-Erreichbarkeit, auffällige Standardports und Prozessnamen |
+| BitLocker Prüfung | Verschlüsselungsstatus, Schutzstatus, Verschlüsselungsgrad und Hinweis bei fehlenden Rechten |
+| Markdown-Report | Automatische Erstellung eines Support-Berichts als Markdown-Datei |
 
 ## Beispielausgabe
 
@@ -105,7 +110,7 @@ Der Ordner `reports/` ist absichtlich in `.gitignore` eingetragen, damit lokale 
 
 ## Hinweis zum Datenschutz
 
-Das Tool liest lokale System- und Sicherheitsinformationen aus. Erzeugte Berichte können Gerätenamen, Benutzernamen, IP-Adressen und Update-Informationen enthalten. Diese Berichte sollten nicht ungeprüft veröffentlicht werden.
+Das Tool liest lokale System- und Sicherheitsinformationen aus. Erzeugte Berichte können Gerätenamen, Benutzernamen, IP-Adressen und Update-Informationen enthalten. Diese Berichte sollten nicht ungeprüft veröffentlicht werden. Besonders die Abschnitte zu offenen Ports, Prozessnamen, IP-Adressen und BitLocker sollten vor einer Veröffentlichung geprüft oder anonymisiert werden.
 
 ## Ziel des Projekts
 
