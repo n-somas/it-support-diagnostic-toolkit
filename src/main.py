@@ -4,6 +4,8 @@ from checks.disk_check import get_disk_info
 from checks.firewall_check import get_firewall_info
 from checks.defender_check import get_defender_info
 from checks.windows_update_check import get_windows_update_info
+from report.markdown_report import save_markdown_report
+
 
 def print_section(title, data):
     """
@@ -27,29 +29,34 @@ def main():
     print("IT Support Diagnostic Toolkit")
     print("=" * 35)
 
-    # Systeminformationen auslesen und anzeigen
+    # Alle Diagnose-Checks ausführen
     system_info = get_system_info()
-    print_section("Systeminformationen", system_info)
-
-    # Netzwerkinformationen auslesen und anzeigen
     network_info = get_network_info()
-    print_section("Netzwerkprüfung", network_info)
-
-    # Speicherplatz prüfen und anzeigen
     disk_info = get_disk_info()
-    print_section("Speicherplatzprüfung", disk_info)
-
-    # Windows-Firewall prüfen und anzeigen
     firewall_info = get_firewall_info()
-    print_section("Firewallprüfung", firewall_info)
-
-    # Microsoft Defender prüfen und anzeigen
     defender_info = get_defender_info()
-    print_section("Defenderprüfung", defender_info)
-
-    # Windows Update prüfen und anzeigen
     windows_update_info = get_windows_update_info()
-    print_section("Windows Update Prüfung", windows_update_info)
+
+    # Ergebnisse als Abschnitte sammeln
+    sections = [
+        ("Systeminformationen", system_info),
+        ("Netzwerkprüfung", network_info),
+        ("Speicherplatzprüfung", disk_info),
+        ("Firewallprüfung", firewall_info),
+        ("Defenderprüfung", defender_info),
+        ("Windows Update Prüfung", windows_update_info),
+    ]
+
+    # Ergebnisse in der Konsole anzeigen
+    for title, data in sections:
+        print_section(title, data)
+
+    # Markdown-Bericht speichern
+    report_path = save_markdown_report(sections)
+
+    print("\nBericht erstellt:")
+    print("-" * 35)
+    print(report_path)
 
 
 if __name__ == "__main__":
