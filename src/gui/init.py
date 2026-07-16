@@ -1,0 +1,1 @@
+"""Grafische Benutzeroberfläche des IT Support Diagnostic Toolkit."""
