@@ -1,6 +1,34 @@
 import customtkinter as ctk
 
 
+STATUS_STYLES = {
+    "OK": {
+        "color": ("#2E7D32", "#4CAF50"),
+        "text": "OK",
+    },
+    "INFO": {
+        "color": ("#1565C0", "#42A5F5"),
+        "text": "INFO",
+    },
+    "HINWEIS": {
+        "color": ("#6A1B9A", "#AB47BC"),
+        "text": "HINWEIS",
+    },
+    "WARNUNG": {
+        "color": ("#EF6C00", "#FFA726"),
+        "text": "WARNUNG",
+    },
+    "KRITISCH": {
+        "color": ("#C62828", "#EF5350"),
+        "text": "KRITISCH",
+    },
+    "FEHLER": {
+        "color": ("#8E0000", "#D32F2F"),
+        "text": "FEHLER",
+    },
+}
+
+
 class ResultCard(ctk.CTkFrame):
     """Stellt das Ergebnis eines Diagnosebereichs dar."""
 
@@ -10,24 +38,42 @@ class ResultCard(ctk.CTkFrame):
         title: str,
         result: dict,
     ) -> None:
-        super().__init__(master)
+        super().__init__(
+            master,
+            corner_radius=10,
+            border_width=1,
+        )
 
         self.title = title
         self.result = result
+        self.rating = self._get_rating()
+        self.status_style = STATUS_STYLES.get(
+            self.rating,
+            STATUS_STYLES["INFO"],
+        )
 
-        self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=1)
 
         self._create_content()
 
     def _create_content(self) -> None:
-        """Erstellt Überschrift, Status und Ergebnisdetails."""
+        """Erstellt Statusindikator, Überschrift und Ergebnisdetails."""
 
-        rating = str(
-            self.result.get(
-                "Bewertung",
-                self.result.get("Status", "INFO"),
-            )
-        ).upper()
+        status_indicator = ctk.CTkFrame(
+            self,
+            width=6,
+            corner_radius=4,
+            fg_color=self.status_style["color"],
+        )
+        status_indicator.grid(
+            row=0,
+            column=0,
+            rowspan=2,
+            padx=(0, 0),
+            pady=8,
+            sticky="ns",
+        )
+        status_indicator.grid_propagate(False)
 
         header = ctk.CTkFrame(
             self,
@@ -35,7 +81,7 @@ class ResultCard(ctk.CTkFrame):
         )
         header.grid(
             row=0,
-            column=0,
+            column=1,
             padx=18,
             pady=(14, 8),
             sticky="ew",
@@ -59,10 +105,14 @@ class ResultCard(ctk.CTkFrame):
 
         rating_label = ctk.CTkLabel(
             header,
-            text=rating,
-            width=100,
+            text=self.status_style["text"],
+            width=105,
+            height=28,
+            corner_radius=8,
+            fg_color=self.status_style["color"],
+            text_color=("white", "white"),
             font=ctk.CTkFont(
-                size=13,
+                size=12,
                 weight="bold",
             ),
         )
@@ -80,15 +130,26 @@ class ResultCard(ctk.CTkFrame):
             text=details_text,
             justify="left",
             anchor="w",
-            wraplength=680,
+            wraplength=720,
+            font=ctk.CTkFont(size=13),
         )
         details_label.grid(
             row=1,
-            column=0,
+            column=1,
             padx=18,
-            pady=(0, 14),
+            pady=(0, 16),
             sticky="ew",
         )
+
+    def _get_rating(self) -> str:
+        """Ermittelt den Status des Diagnoseergebnisses."""
+
+        rating = self.result.get(
+            "Bewertung",
+            self.result.get("Status", "INFO"),
+        )
+
+        return str(rating).upper()
 
     def _create_details_text(self) -> str:
         """Erstellt eine kompakte Detailansicht des Ergebnisses."""
@@ -126,7 +187,17 @@ class ResultCard(ctk.CTkFrame):
             if not value:
                 return "Keine Einträge"
 
-            return ", ".join(str(item) for item in value[:5])
+            visible_items = [
+                str(item)
+                for item in value[:5]
+            ]
+
+            formatted_value = ", ".join(visible_items)
+
+            if len(value) > 5:
+                formatted_value += f" und {len(value) - 5} weitere"
+
+            return formatted_value
 
         if isinstance(value, dict):
             if not value:
@@ -136,6 +207,12 @@ class ResultCard(ctk.CTkFrame):
                 f"{key}={item}"
                 for key, item in list(value.items())[:5]
             ]
-            return ", ".join(entries)
+
+            formatted_value = ", ".join(entries)
+
+            if len(value) > 5:
+                formatted_value += f" und {len(value) - 5} weitere"
+
+            return formatted_value
 
         return str(value)
