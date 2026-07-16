@@ -1,5 +1,7 @@
 import customtkinter as ctk
 
+from src.gui.detail_window import ResultDetailWindow
+
 
 STATUS_STYLES = {
     "OK": {
@@ -68,8 +70,7 @@ class ResultCard(ctk.CTkFrame):
         status_indicator.grid(
             row=0,
             column=0,
-            rowspan=2,
-            padx=(0, 0),
+            rowspan=3,
             pady=8,
             sticky="ns",
         )
@@ -110,7 +111,7 @@ class ResultCard(ctk.CTkFrame):
             height=28,
             corner_radius=8,
             fg_color=self.status_style["color"],
-            text_color=("white", "white"),
+            text_color="white",
             font=ctk.CTkFont(
                 size=12,
                 weight="bold",
@@ -123,11 +124,9 @@ class ResultCard(ctk.CTkFrame):
             sticky="e",
         )
 
-        details_text = self._create_details_text()
-
         details_label = ctk.CTkLabel(
             self,
-            text=details_text,
+            text=self._create_details_text(),
             justify="left",
             anchor="w",
             wraplength=720,
@@ -137,8 +136,33 @@ class ResultCard(ctk.CTkFrame):
             row=1,
             column=1,
             padx=18,
-            pady=(0, 16),
+            pady=(0, 8),
             sticky="ew",
+        )
+
+        details_button = ctk.CTkButton(
+            self,
+            text="Details anzeigen",
+            width=145,
+            height=32,
+            command=self._open_details,
+        )
+        details_button.grid(
+            row=2,
+            column=1,
+            padx=18,
+            pady=(0, 16),
+            sticky="e",
+        )
+
+    def _open_details(self) -> None:
+        """Öffnet ein Fenster mit allen Ergebniswerten."""
+
+        ResultDetailWindow(
+            master=self.winfo_toplevel(),
+            title=self.title,
+            result=self.result,
+            status_color=self.status_style["color"],
         )
 
     def _get_rating(self) -> str:
@@ -152,7 +176,7 @@ class ResultCard(ctk.CTkFrame):
         return str(rating).upper()
 
     def _create_details_text(self) -> str:
-        """Erstellt eine kompakte Detailansicht des Ergebnisses."""
+        """Erstellt eine kompakte Vorschau des Ergebnisses."""
 
         ignored_keys = {
             "Bewertung",
@@ -181,7 +205,10 @@ class ResultCard(ctk.CTkFrame):
 
     @staticmethod
     def _format_value(value) -> str:
-        """Formatiert Listen, Dictionaries und einfache Werte."""
+        """Formatiert Werte für die kompakte Kartenansicht."""
+
+        if isinstance(value, bool):
+            return "Ja" if value else "Nein"
 
         if isinstance(value, list):
             if not value:
@@ -189,13 +216,13 @@ class ResultCard(ctk.CTkFrame):
 
             visible_items = [
                 str(item)
-                for item in value[:5]
+                for item in value[:3]
             ]
 
             formatted_value = ", ".join(visible_items)
 
-            if len(value) > 5:
-                formatted_value += f" und {len(value) - 5} weitere"
+            if len(value) > 3:
+                formatted_value += f" und {len(value) - 3} weitere"
 
             return formatted_value
 
@@ -205,13 +232,13 @@ class ResultCard(ctk.CTkFrame):
 
             entries = [
                 f"{key}={item}"
-                for key, item in list(value.items())[:5]
+                for key, item in list(value.items())[:3]
             ]
 
             formatted_value = ", ".join(entries)
 
-            if len(value) > 5:
-                formatted_value += f" und {len(value) - 5} weitere"
+            if len(value) > 3:
+                formatted_value += f" und {len(value) - 3} weitere"
 
             return formatted_value
 
