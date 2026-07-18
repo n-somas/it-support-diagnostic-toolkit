@@ -11,13 +11,15 @@ def run_powershell_command(command):
         [
             "powershell",
             "-NoProfile",
+            "-NonInteractive",
             "-Command",
             command
         ],
         capture_output=True,
         text=True,
         encoding="utf-8",
-        errors="ignore"
+        errors="ignore",
+        creationflags=subprocess.CREATE_NO_WINDOW,
     )
 
     return result.stdout.strip()

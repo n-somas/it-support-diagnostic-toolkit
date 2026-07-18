@@ -76,7 +76,8 @@ def get_default_gateway():
         capture_output=True,
         text=True,
         encoding="utf-8",
-        errors="ignore"
+        errors="ignore",
+        creationflags=subprocess.CREATE_NO_WINDOW,
     )
 
     gateway = result.stdout.strip()
