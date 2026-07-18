@@ -1,10 +1,14 @@
+import os
 import threading
 from collections import Counter
+from pathlib import Path
+from tkinter import filedialog, messagebox
 
 import customtkinter as ctk
 
 from src.diagnostic_runner import run_all_diagnostics
 from src.gui.result_card import ResultCard
+from src.report.markdown_report import save_markdown_report
 
 
 SUMMARY_STYLES = {
@@ -42,14 +46,15 @@ class DiagnosticApp(ctk.CTk):
         super().__init__()
 
         self.title("IT Support Diagnostic Toolkit")
-        self.geometry("1050x820")
-        self.minsize(860, 660)
+        self.geometry("1050x840")
+        self.minsize(860, 680)
 
         ctk.set_appearance_mode("system")
         ctk.set_default_color_theme("blue")
 
         self.diagnostic_results: list[tuple[str, dict]] = []
         self.summary_value_labels: dict[str, ctk.CTkLabel] = {}
+        self.latest_report_path: Path | None = None
 
         self._create_layout()
 
@@ -115,7 +120,7 @@ class DiagnosticApp(ctk.CTk):
             sticky="nsew",
         )
         content.grid_columnconfigure(0, weight=1)
-        content.grid_rowconfigure(5, weight=1)
+        content.grid_rowconfigure(6, weight=1)
 
         self.status_label = ctk.CTkLabel(
             content,
@@ -172,13 +177,14 @@ class DiagnosticApp(ctk.CTk):
         )
 
         self._create_summary_dashboard(content)
+        self._create_report_actions(content)
 
         self.results_frame = ctk.CTkScrollableFrame(
             content,
             label_text="Diagnoseergebnisse",
         )
         self.results_frame.grid(
-            row=5,
+            row=6,
             column=0,
             padx=20,
             pady=(6, 20),
@@ -285,12 +291,77 @@ class DiagnosticApp(ctk.CTk):
 
         self.summary_frame.grid_remove()
 
+    def _create_report_actions(self, master) -> None:
+        """Erstellt die Schaltflächen für den Diagnosebericht."""
+
+        self.report_actions_frame = ctk.CTkFrame(
+            master,
+            fg_color="transparent",
+        )
+        self.report_actions_frame.grid(
+            row=5,
+            column=0,
+            padx=20,
+            pady=(0, 12),
+        )
+
+        self.open_report_button = ctk.CTkButton(
+            self.report_actions_frame,
+            text="Bericht öffnen",
+            width=170,
+            height=38,
+            state="disabled",
+            command=self._open_report,
+        )
+        self.open_report_button.grid(
+            row=0,
+            column=0,
+            padx=6,
+        )
+
+        self.save_report_button = ctk.CTkButton(
+            self.report_actions_frame,
+            text="Bericht speichern unter",
+            width=190,
+            height=38,
+            state="disabled",
+            command=self._save_report_as,
+        )
+        self.save_report_button.grid(
+            row=0,
+            column=1,
+            padx=6,
+        )
+
+        self.report_path_label = ctk.CTkLabel(
+            master,
+            text="",
+            font=ctk.CTkFont(size=12),
+        )
+        self.report_path_label.grid(
+            row=7,
+            column=0,
+            padx=20,
+            pady=(0, 10),
+        )
+
+        self.report_actions_frame.grid_remove()
+        self.report_path_label.grid_remove()
+
     def _start_scan(self) -> None:
         """Startet die Diagnose in einem Hintergrund-Thread."""
 
         self._clear_results()
         self._reset_summary_dashboard()
+
         self.summary_frame.grid_remove()
+        self.report_actions_frame.grid_remove()
+        self.report_path_label.grid_remove()
+
+        self.latest_report_path = None
+
+        self.open_report_button.configure(state="disabled")
+        self.save_report_button.configure(state="disabled")
 
         self.scan_button.configure(
             state="disabled",
@@ -376,7 +447,7 @@ class DiagnosticApp(ctk.CTk):
         self,
         results: list[tuple[str, dict]],
     ) -> None:
-        """Zeigt die Ergebnisse nach abgeschlossener Diagnose an."""
+        """Zeigt Ergebnisse und Bericht nach abgeschlossener Diagnose an."""
 
         self.diagnostic_results = results
         self.progress_bar.set(1)
@@ -403,11 +474,121 @@ class DiagnosticApp(ctk.CTk):
 
         self._update_summary_dashboard(status_counts)
         self._display_results(results)
+        self._create_default_report(results)
 
         self.scan_button.configure(
             state="normal",
             text="Erneut prüfen",
         )
+
+    def _create_default_report(
+        self,
+        results: list[tuple[str, dict]],
+    ) -> None:
+        """Speichert nach dem Scan automatisch einen Markdown-Bericht."""
+
+        try:
+            report_path = save_markdown_report(
+                results,
+                file_path="reports/support_report.md",
+            )
+
+            self.latest_report_path = Path(report_path).resolve()
+
+            self.open_report_button.configure(state="normal")
+            self.save_report_button.configure(state="normal")
+
+            self.report_actions_frame.grid()
+
+            self.report_path_label.configure(
+                text=f"Bericht erstellt: {self.latest_report_path}"
+            )
+            self.report_path_label.grid()
+
+        except Exception as error:
+            self.latest_report_path = None
+
+            self.report_path_label.configure(
+                text=f"Bericht konnte nicht erstellt werden: {error}"
+            )
+            self.report_path_label.grid()
+
+    def _open_report(self) -> None:
+        """Öffnet den zuletzt erstellten Bericht im Standardprogramm."""
+
+        if self.latest_report_path is None:
+            messagebox.showwarning(
+                "Kein Bericht",
+                "Es wurde noch kein Diagnosebericht erstellt.",
+            )
+            return
+
+        if not self.latest_report_path.exists():
+            messagebox.showerror(
+                "Datei nicht gefunden",
+                "Der Diagnosebericht wurde nicht gefunden.",
+            )
+            return
+
+        try:
+            os.startfile(self.latest_report_path)
+
+        except OSError as error:
+            messagebox.showerror(
+                "Bericht konnte nicht geöffnet werden",
+                str(error),
+            )
+
+    def _save_report_as(self) -> None:
+        """Speichert den aktuellen Bericht an einem ausgewählten Ort."""
+
+        if not self.diagnostic_results:
+            messagebox.showwarning(
+                "Keine Ergebnisse",
+                "Führe zuerst eine Systemdiagnose durch.",
+            )
+            return
+
+        selected_path = filedialog.asksaveasfilename(
+            title="Diagnosebericht speichern",
+            defaultextension=".md",
+            filetypes=[
+                ("Markdown-Bericht", "*.md"),
+                ("Textdatei", "*.txt"),
+                ("Alle Dateien", "*.*"),
+            ],
+            initialfile="IT-Support-Diagnosebericht.md",
+        )
+
+        if not selected_path:
+            return
+
+        try:
+            saved_path = save_markdown_report(
+                self.diagnostic_results,
+                file_path=selected_path,
+            )
+
+            self.latest_report_path = Path(saved_path).resolve()
+
+            self.open_report_button.configure(state="normal")
+
+            self.report_path_label.configure(
+                text=f"Bericht gespeichert: {self.latest_report_path}"
+            )
+            self.report_path_label.grid()
+
+            messagebox.showinfo(
+                "Bericht gespeichert",
+                f"Der Diagnosebericht wurde gespeichert.\n\n"
+                f"{self.latest_report_path}",
+            )
+
+        except Exception as error:
+            messagebox.showerror(
+                "Speichern fehlgeschlagen",
+                str(error),
+            )
 
     def _count_statuses(
         self,
