@@ -5,3 +5,7 @@ reports/
 .env
 .idea/
 .vscode/
+# PyInstaller
+build/
+dist/
+*.spec
