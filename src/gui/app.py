@@ -55,6 +55,8 @@ class DiagnosticApp(ctk.CTk):
 
         self.diagnostic_results: list[tuple[str, dict]] = []
         self.summary_value_labels: dict[str, ctk.CTkLabel] = {}
+        self.summary_cards: dict[str, ctk.CTkFrame] = {}
+        self.active_status_filter: str | None = None
         self.latest_report_path: Path | None = None
 
         self._create_layout()
@@ -112,16 +114,19 @@ class DiagnosticApp(ctk.CTk):
     def _create_content(self) -> None:
         """Erstellt Steuerung, Dashboard und Ergebnisbereich."""
 
-        content = ctk.CTkFrame(self)
+        content = ctk.CTkScrollableFrame(
+            self,
+            corner_radius=0,
+            fg_color="transparent",
+        )
         content.grid(
             row=1,
             column=0,
-            padx=24,
-            pady=24,
+            padx=12,
+            pady=12,
             sticky="nsew",
         )
         content.grid_columnconfigure(0, weight=1)
-        content.grid_rowconfigure(6, weight=1)
 
         self.status_label = ctk.CTkLabel(
             content,
@@ -180,16 +185,46 @@ class DiagnosticApp(ctk.CTk):
         self._create_summary_dashboard(content)
         self._create_report_actions(content)
 
-        self.results_frame = ctk.CTkScrollableFrame(
+        self.results_section = ctk.CTkFrame(
             content,
-            label_text="Diagnoseergebnisse",
+            corner_radius=10,
         )
-        self.results_frame.grid(
+        self.results_section.grid(
             row=6,
             column=0,
             padx=20,
             pady=(6, 20),
-            sticky="nsew",
+            sticky="ew",
+        )
+        self.results_section.grid_columnconfigure(0, weight=1)
+
+        results_title = ctk.CTkLabel(
+            self.results_section,
+            text="Diagnoseergebnisse",
+            anchor="w",
+            font=ctk.CTkFont(
+                size=16,
+                weight="bold",
+            ),
+        )
+        results_title.grid(
+            row=0,
+            column=0,
+            padx=18,
+            pady=(14, 8),
+            sticky="w",
+        )
+
+        self.results_frame = ctk.CTkFrame(
+            self.results_section,
+            fg_color="transparent",
+        )
+        self.results_frame.grid(
+            row=1,
+            column=0,
+            padx=8,
+            pady=(0, 12),
+            sticky="ew",
         )
         self.results_frame.grid_columnconfigure(
             0,
@@ -206,6 +241,8 @@ class DiagnosticApp(ctk.CTk):
             padx=20,
             pady=40,
         )
+
+        self.results_section.grid_remove()
 
     def _create_summary_dashboard(self, master) -> None:
         """Erstellt die kompakte Statusübersicht."""
@@ -289,6 +326,11 @@ class DiagnosticApp(ctk.CTk):
             )
 
             self.summary_value_labels[status] = value_label
+            self.summary_cards[status] = card
+            self._bind_status_card(
+                card,
+                status,
+            )
 
         self.status_chart = StatusBarChart(
             self.summary_frame,
@@ -371,6 +413,10 @@ class DiagnosticApp(ctk.CTk):
         self.summary_frame.grid_remove()
         self.report_actions_frame.grid_remove()
         self.report_path_label.grid_remove()
+        self.results_section.grid_remove()
+
+        self.active_status_filter = None
+        self._update_status_card_selection()
 
         self.latest_report_path = None
 
@@ -487,7 +533,13 @@ class DiagnosticApp(ctk.CTk):
         )
 
         self._update_summary_dashboard(status_counts)
+
+        self.active_status_filter = None
+        self._update_status_card_selection()
+
         self._display_results(results)
+        self.results_section.grid()
+
         self._create_default_report(results)
 
         self.scan_button.configure(
@@ -644,13 +696,107 @@ class DiagnosticApp(ctk.CTk):
         self.status_chart.clear()
         self.status_chart.grid_remove()
 
+    def _bind_status_card(
+        self,
+        widget,
+        status: str,
+    ) -> None:
+        """Macht eine Statuskarte einschließlich ihrer Kinder anklickbar."""
+
+        widget.bind(
+            "<Button-1>",
+            lambda event, selected_status=status: (
+                self._toggle_status_filter(selected_status)
+            ),
+        )
+
+        try:
+            widget.configure(cursor="hand2")
+        except (TypeError, ValueError):
+            pass
+
+        for child in widget.winfo_children():
+            self._bind_status_card(
+                child,
+                status,
+            )
+
+    def _toggle_status_filter(
+        self,
+        status: str,
+    ) -> None:
+        """Aktiviert oder entfernt einen Ergebnisfilter."""
+
+        if not self.diagnostic_results:
+            return
+
+        if self.active_status_filter == status:
+            self.active_status_filter = None
+            filtered_results = self.diagnostic_results
+        else:
+            self.active_status_filter = status
+            filtered_results = [
+                (title, result)
+                for title, result in self.diagnostic_results
+                if self._get_rating(result) == status
+            ]
+
+        self._update_status_card_selection()
+        self._display_results(filtered_results)
+        self.results_section.grid()
+
+    def _update_status_card_selection(self) -> None:
+        """Hebt die aktuell ausgewählte Statuskarte hervor."""
+
+        for status, card in self.summary_cards.items():
+            is_selected = (
+                status == self.active_status_filter
+            )
+
+            card.configure(
+                border_width=(
+                    3 if is_selected else 1
+                ),
+                border_color=(
+                    SUMMARY_STYLES[status]["color"]
+                    if is_selected
+                    else ("gray70", "gray35")
+                ),
+            )
+
     def _display_results(
         self,
         results: list[tuple[str, dict]],
     ) -> None:
-        """Erstellt für jeden Diagnosebereich eine Ergebniskarte."""
+        """Zeigt Diagnoseergebnisse oder einen leeren Filterzustand."""
 
         self._clear_results()
+
+        if not results:
+            selected_status = (
+                SUMMARY_STYLES[
+                    self.active_status_filter
+                ]["label"]
+                if self.active_status_filter
+                else "dieser Auswahl"
+            )
+
+            empty_filter_label = ctk.CTkLabel(
+                self.results_frame,
+                text=(
+                    f"Keine Ergebnisse für "
+                    f"„{selected_status}“ vorhanden."
+                ),
+                font=ctk.CTkFont(size=14),
+                text_color=("gray40", "gray70"),
+            )
+            empty_filter_label.grid(
+                row=0,
+                column=0,
+                padx=20,
+                pady=40,
+            )
+            return
 
         for row_index, (title, result) in enumerate(results):
             card = ResultCard(
