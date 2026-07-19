@@ -1,131 +1,202 @@
 # IT Support Diagnostic Toolkit
 
-Ein Python-basiertes Diagnose-Tool für typische Windows-Supportfälle.
+Eine grafische Windows-Diagnoseanwendung zur automatisierten Prüfung typischer Support-, Netzwerk- und Sicherheitsbereiche.
 
-Das Tool prüft grundlegende System-, Netzwerk- und Sicherheitsparameter eines Windows-Systems und erstellt daraus einen strukturierten Markdown-Bericht. Ziel ist es, wiederkehrende Support-Prüfungen schneller, nachvollziehbarer und dokumentierbar zu machen.
+![Dashboard des IT Support Diagnostic Toolkit](docs/images/dashboard.png)
 
-## Funktionen
+![Python](https://img.shields.io/badge/Python-3.12-blue)
+![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011-0078D4)
+![GUI](https://img.shields.io/badge/GUI-CustomTkinter-1F6AA5)
+![Charts](https://img.shields.io/badge/Charts-Matplotlib-11557C)
+![Status](https://img.shields.io/badge/Status-Active%20Development-orange)
 
-- Auslesen grundlegender Systeminformationen
-- Prüfung der aktiven Netzwerkverbindung
-- DNS-Auflösung testen
-- Ping-Test zu bekannten DNS-Servern
-- Speicherplatzprüfung von Laufwerk C:
-- Bewertung des freien Speicherplatzes
-- Prüfung der Windows-Firewall-Profile
-- Prüfung des Microsoft Defender Status
-- Prüfung des Windows Update Status
-- Prüfung lokal offener TCP-Listening-Ports
-- Zuordnung auffälliger Ports zu Prozessnamen
-- Prüfung des BitLocker-Status von Laufwerk C:
-- Erstellung eines Markdown-Supportberichts
-- Erstellung einer Gesamtbewertung aus allen Diagnosebereichen
+## Überblick
 
-## Aktuelle Diagnosebereiche
+Das IT Support Diagnostic Toolkit bündelt mehrere Windows-Prüfungen in einer grafischen Anwendung. Die Ergebnisse werden automatisch bewertet und in einer übersichtlichen Oberfläche dargestellt.
+
+Die Anwendung zeigt den aktuellen Systemzustand über Statuskarten, Diagramme und filterbare Ergebnisbereiche. Zusätzlich erstellt sie einen strukturierten Markdown-Bericht und speichert Diagnoseläufe für spätere Vergleiche.
+
+Das Projekt wurde als praxisnahes Portfolio-Projekt für IT-Support, Systemadministration und Cybersecurity-Grundlagen entwickelt.
+
+## Hauptfunktionen
+
+- grafische Windows-Desktopanwendung mit CustomTkinter
+- automatisierte Prüfung mehrerer System- und Sicherheitsbereiche
+- kompakte Statusübersicht mit OK, Info, Hinweis, Warnung, Kritisch und Fehler
+- anklickbare Statuskarten zur Filterung der Diagnoseergebnisse
+- Diagramm zur aktuellen Statusverteilung
+- gestapelte Darstellung der Speicherbelegung
+- Diagnoseverlauf auf Basis gespeicherter Scans
+- strukturierte Detailansicht für jeden Diagnosebereich
+- automatischer Markdown-Supportbericht
+- Bericht öffnen und an einem eigenen Zielort speichern
+- Erstellung einer eigenständigen Windows-EXE mit PyInstaller
+- versteckte Ausführung externer Windows- und PowerShell-Prozesse
+
+## Screenshots
+
+### Startansicht
+
+Die Anwendung zeigt beim Start nur den zentralen Diagnosebereich. Ergebnisse und Diagramme erscheinen erst nach einer abgeschlossenen Prüfung.
+
+![Startansicht der Anwendung](docs/images/start-screen.png)
+
+### Dashboard und Statusverteilung
+
+Nach der Diagnose werden die Gesamtbewertung, die Statuskarten und die aktuelle Verteilung der Ergebnisse angezeigt.
+
+![Dashboard mit Statuskarten und Statusdiagramm](docs/images/dashboard.png)
+
+### Speicherbelegung
+
+Der belegte und freie Speicherplatz von Laufwerk C: wird als gestapelte Säule dargestellt.
+
+![Gestapelte Darstellung der Speicherbelegung](docs/images/disk-usage.png)
+
+### Berichtsfunktionen
+
+Diagnoseberichte können direkt geöffnet oder an einem frei gewählten Zielort gespeichert werden.
+
+![Schaltflächen für Diagnoseberichte](docs/images/report-actions.png)
+
+## Diagnosebereiche
 
 | Bereich | Beschreibung |
 |---|---|
-| Systeminformationen | Computername, Benutzername, Betriebssystem, Architektur, CPU-Kerne und Speicherplatz |
-| Netzwerkprüfung | Aktive IP-Adresse, Standardgateway, Ping-Test und DNS-Auflösung |
-| Speicherplatzprüfung | Freier Speicherplatz in GB und Prozent mit Bewertung |
-| Firewallprüfung | Status der Windows-Firewall für Domänen-, privates und öffentliches Profil |
-| Defenderprüfung | Echtzeitschutz, Antivirus-Status, Signaturversion und letztes Signaturupdate |
-| Windows Update Prüfung | Windows Update Dienst, letztes installiertes Update, Hinweis und Bewertung |
-| Offene Ports Prüfung | Anzahl offener TCP-Listening-Ports, Netzwerk-Erreichbarkeit, auffällige Standardports und Prozessnamen |
-| BitLocker Prüfung | Verschlüsselungsstatus, Schutzstatus, Verschlüsselungsgrad und Hinweis bei fehlenden Rechten |
-| Markdown-Report | Automatische Erstellung eines Support-Berichts als Markdown-Datei |
-| Gesamtbewertung | Zählt OK, HINWEIS, WARNUNG und KRITISCH und erstellt einen Gesamtstatus |
+| Systeminformationen | Computername, Benutzername, Betriebssystem, Architektur, CPU-Kerne und weitere Systemdaten |
+| Netzwerkprüfung | Aktive IP-Adresse, Standardgateway, Ping-Tests und DNS-Auflösung |
+| Speicherplatzprüfung | Gesamt-, belegter und freier Speicherplatz mit automatischer Bewertung |
+| Firewallprüfung | Status der Windows-Firewall für Domänen-, private und öffentliche Profile |
+| Defenderprüfung | Echtzeitschutz, Antivirus-Status, Signaturinformationen und Schutzstatus |
+| Windows Update | Update-Dienst, letztes installiertes Update und Bewertung des Update-Status |
+| Offene Ports | Lokale TCP-Listening-Ports, zugehörige Prozesse und auffällige Standardports |
+| BitLocker | Verschlüsselungsstatus, Schutzstatus und Verschlüsselungsgrad von Laufwerk C: |
+| Markdown-Bericht | Automatische Erstellung eines strukturierten Supportberichts |
+| Gesamtbewertung | Zusammenfassung aller Ergebnisse nach Statusstufe |
+| Scan-Historie | Speicherung vergangener Diagnosen für spätere Verlaufsdiagramme |
 
-## Beispielausgabe
+## Statusbewertung
 
-```text
-IT Support Diagnostic Toolkit
-===================================
+| Status | Bedeutung |
+|---|---|
+| OK | Prüfung ohne Auffälligkeit abgeschlossen |
+| Info | Informative Systemangabe ohne Handlungsbedarf |
+| Hinweis | Auffälligkeit oder Information, die geprüft werden sollte |
+| Warnung | Möglicher Handlungsbedarf |
+| Kritisch | Dringender Handlungsbedarf |
+| Fehler | Prüfung konnte nicht korrekt ausgeführt werden |
 
-Systeminformationen:
------------------------------------
-Computername: DESKTOP-EXAMPLE
-Benutzername: user
-Betriebssystem: Windows
-Windows-Version: 10.0.xxxxx
-Windows-Release: 11
-Architektur: AMD64
-CPU-Kerne: 8
-
-Netzwerkprüfung:
------------------------------------
-Aktive IP-Adresse: 192.168.x.x
-Standardgateway: 192.168.x.1
-Ping Google DNS 8.8.8.8: OK
-Ping Cloudflare DNS 1.1.1.1: OK
-DNS-Auflösung google.com: OK
-
-Speicherplatzprüfung:
------------------------------------
-Laufwerk: C:
-Freier Speicher in Prozent: 21.21 %
-Bewertung: OK
-```
+Die Statuskarten im Dashboard sind interaktiv. Ein Klick auf eine Karte zeigt nur die dazugehörigen Diagnoseergebnisse an. Ein erneuter Klick entfernt den Filter.
 
 ## Voraussetzungen
 
-* Windows 10 oder Windows 11
-* Python 3.12 oder neuer
-* PowerShell
-* VS Code empfohlen
+- Windows 10 oder Windows 11
+- Python 3.12 oder neuer
+- PowerShell
+- Git
 
-## Projekt starten
-
-Repository klonen oder lokal öffnen:
+## Installation
 
 ```powershell
-cd C:\Users\nsoma\documents\it-support-diagnostic-toolkit
-```
-
-Virtuelle Umgebung erstellen:
-
-```powershell
+git clone https://github.com/n-somas/it-support-diagnostic-toolkit.git
+cd it-support-diagnostic-toolkit
 python -m venv .venv
-```
-
-Virtuelle Umgebung aktivieren:
-
-```powershell
 .venv\Scripts\activate
+python -m pip install -r requirements.txt
 ```
 
-Programm starten:
+## Anwendung starten
 
 ```powershell
-python src\main.py
+python -m src.gui.app
 ```
 
-## Bericht erzeugen
+## Windows-EXE erstellen
 
-Nach dem Start erstellt das Tool automatisch einen Markdown-Bericht:
+```powershell
+.\build_exe.ps1
+```
+
+Die fertige Datei befindet sich anschließend unter:
 
 ```text
-reports/support_report.md
+dist\IT-Support-Diagnostic-Toolkit.exe
 ```
 
-Der Ordner `reports/` ist absichtlich in `.gitignore` eingetragen, damit lokale Systemdaten nicht versehentlich auf GitHub veröffentlicht werden.
+## Berichte
 
-## Hinweis zum Datenschutz
+Nach einer abgeschlossenen Diagnose wird automatisch ein Markdown-Bericht erzeugt:
 
-Das Tool liest lokale System- und Sicherheitsinformationen aus. Erzeugte Berichte können Gerätenamen, Benutzernamen, IP-Adressen und Update-Informationen enthalten. Diese Berichte sollten nicht ungeprüft veröffentlicht werden. Besonders die Abschnitte zu offenen Ports, Prozessnamen, IP-Adressen und BitLocker sollten vor einer Veröffentlichung geprüft oder anonymisiert werden.
+```text
+reports\support_report.md
+```
 
-## Ziel des Projekts
+Der Bericht kann in der Anwendung geöffnet oder unter einem eigenen Dateinamen gespeichert werden.
 
-Dieses Projekt dient als praxisnahes Portfolio-Projekt für IT-Support, Systemadministration und Cybersecurity-Grundlagen.
+## Scan-Historie
 
-Es zeigt unter anderem:
+Diagnoseläufe werden lokal als JSON-Dateien gespeichert:
 
-* Automatisierung mit Python
-* Ausführung von PowerShell-Befehlen aus Python
-* Strukturierte Fehlerdiagnose
-* Bewertung typischer Windows-Supportfälle
-* Erstellung eines nachvollziehbaren Support-Berichts
+```text
+data\scans
+```
 
-## Status
+Diese Daten werden für den Diagnoseverlauf verwendet.
 
-Aktueller Stand: funktionsfähiger Prototyp mit mehreren Diagnose-Checks und Markdown-Report.
+## Projektstruktur
+
+```text
+it-support-diagnostic-toolkit/
+├── src/
+│   ├── checks/
+│   ├── gui/
+│   ├── report/
+│   ├── services/
+│   ├── utils/
+│   └── diagnostic_runner.py
+├── docs/
+│   └── images/
+├── data/
+│   └── scans/
+├── reports/
+├── build_exe.ps1
+├── requirements.txt
+└── README.md
+```
+
+## Datenschutz
+
+Die Anwendung liest lokale System-, Netzwerk- und Sicherheitsinformationen aus. Berichte, Screenshots und Scan-Dateien sollten vor einer Veröffentlichung geprüft und bei Bedarf anonymisiert werden.
+
+Das Tool überträgt keine Diagnosedaten automatisch an externe Dienste.
+
+## Technische Schwerpunkte
+
+- Python
+- CustomTkinter
+- Matplotlib
+- PowerShell-Aufrufe aus Python
+- Windows-Systemdiagnose
+- Hintergrund-Threads
+- JSON-Datenhaltung
+- Markdown-Berichte
+- PyInstaller
+- Git und GitHub
+
+## Roadmap
+
+- Vergleich zweier Diagnoseläufe
+- Netzwerk-Latenzdiagramm
+- Verlauf der Speicherbelegung
+- Prüfung von Windows-Diensten
+- Windows-Ereignisanzeige
+- Analyse von Autostartprogrammen
+- HTML- und PDF-Berichte
+- aktivierbare Diagnosemodule
+- Export und Import der Scan-Historie
+
+## Projektstatus
+
+**Funktionsfähige Windows-Desktopanwendung mit mehreren Diagnosemodulen, grafischem Dashboard, interaktiven Ergebnisfiltern, Diagrammen, Scan-Historie, Markdown-Berichten und EXE-Build.**
+
+Das Projekt wird schrittweise weiterentwickelt.
