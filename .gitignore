@@ -9,3 +9,11 @@ reports/
 build/
 dist/
 *.spec
+
+# Lokale Sicherungen und Diagnosedaten
+backup_before_dashboard_upgrade/
+data/scans/
+
+# Lokale Sicherungen und Diagnosedaten
+backup_before_dashboard_upgrade/
+data/scans/
