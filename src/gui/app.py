@@ -8,6 +8,8 @@ import customtkinter as ctk
 
 from src.diagnostic_runner import run_all_diagnostics
 from src.gui.components.charts.status_bar_chart import StatusBarChart
+from src.gui.components.dashboard_extra_charts import DiskUsageChart, HistoryChart
+from src.services.scan_history_service import ScanHistoryService
 from src.gui.result_card import ResultCard
 from src.report.markdown_report import save_markdown_report
 
@@ -58,6 +60,7 @@ class DiagnosticApp(ctk.CTk):
         self.summary_cards: dict[str, ctk.CTkFrame] = {}
         self.active_status_filter: str | None = None
         self.latest_report_path: Path | None = None
+        self.history_service = ScanHistoryService()
 
         self._create_layout()
 
@@ -345,6 +348,43 @@ class DiagnosticApp(ctk.CTk):
         )
         self.status_chart.grid_remove()
 
+        self.extra_charts_frame = ctk.CTkFrame(
+            self.summary_frame,
+            fg_color="transparent",
+        )
+        self.extra_charts_frame.grid(
+            row=2,
+            column=0,
+            columnspan=len(statuses),
+            padx=6,
+            pady=(0, 10),
+            sticky="ew",
+        )
+        self.extra_charts_frame.grid_columnconfigure(
+            0,
+            weight=1,
+        )
+
+        self.disk_chart = DiskUsageChart(
+            self.extra_charts_frame,
+        )
+        self.disk_chart.grid(
+            row=0,
+            column=0,
+            pady=(0, 10),
+            sticky="ew",
+        )
+
+        self.history_chart = HistoryChart(
+            self.extra_charts_frame,
+        )
+        self.history_chart.grid(
+            row=1,
+            column=0,
+            sticky="ew",
+        )
+
+        self.extra_charts_frame.grid_remove()
         self.summary_frame.grid_remove()
 
     def _create_report_actions(self, master) -> None:
@@ -540,6 +580,17 @@ class DiagnosticApp(ctk.CTk):
         self._display_results(results)
         self.results_section.grid()
 
+        try:
+            self.history_service.save(results)
+        except OSError:
+            pass
+
+        self.disk_chart.update_results(results)
+        self.history_chart.update_records(
+            self.history_service.load_recent(limit=10)
+        )
+        self.extra_charts_frame.grid()
+
         self._create_default_report(results)
 
         self.scan_button.configure(
@@ -695,6 +746,7 @@ class DiagnosticApp(ctk.CTk):
 
         self.status_chart.clear()
         self.status_chart.grid_remove()
+        self.extra_charts_frame.grid_remove()
 
     def _bind_status_card(
         self,
