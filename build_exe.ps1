@@ -34,6 +34,7 @@ if (Test-Path ".\IT-Support-Diagnostic-Toolkit.spec") {
     --clean `
     --paths "." `
     --collect-all "customtkinter" `
+    --collect-all "matplotlib" `
     "src\gui\app.py"
 
 if ($LASTEXITCODE -ne 0) {

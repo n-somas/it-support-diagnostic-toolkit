@@ -7,6 +7,7 @@ from tkinter import filedialog, messagebox
 import customtkinter as ctk
 
 from src.diagnostic_runner import run_all_diagnostics
+from src.gui.components.charts.status_bar_chart import StatusBarChart
 from src.gui.result_card import ResultCard
 from src.report.markdown_report import save_markdown_report
 
@@ -288,6 +289,19 @@ class DiagnosticApp(ctk.CTk):
             )
 
             self.summary_value_labels[status] = value_label
+
+        self.status_chart = StatusBarChart(
+            self.summary_frame,
+        )
+        self.status_chart.grid(
+            row=1,
+            column=0,
+            columnspan=len(statuses),
+            padx=6,
+            pady=(0, 10),
+            sticky="ew",
+        )
+        self.status_chart.grid_remove()
 
         self.summary_frame.grid_remove()
 
@@ -617,6 +631,8 @@ class DiagnosticApp(ctk.CTk):
                 text=str(status_counts.get(status, 0))
             )
 
+        self.status_chart.update_data(status_counts)
+        self.status_chart.grid()
         self.summary_frame.grid()
 
     def _reset_summary_dashboard(self) -> None:
@@ -624,6 +640,9 @@ class DiagnosticApp(ctk.CTk):
 
         for value_label in self.summary_value_labels.values():
             value_label.configure(text="0")
+
+        self.status_chart.clear()
+        self.status_chart.grid_remove()
 
     def _display_results(
         self,
