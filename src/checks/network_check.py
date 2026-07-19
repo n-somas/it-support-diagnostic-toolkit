@@ -1,11 +1,13 @@
 import socket
 import subprocess
 
+from src.utils.hidden_process import get_hidden_process_options
+
 
 def check_ping(target: str) -> bool:
     """
     Prüft per Ping, ob ein Ziel erreichbar ist.
-    Der Prozess läuft unter Windows ohne sichtbares Konsolenfenster.
+    Der Prozess läuft ohne sichtbares Konsolenfenster.
     """
 
     result = subprocess.run(
@@ -19,17 +21,15 @@ def check_ping(target: str) -> bool:
         ],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
-        creationflags=subprocess.CREATE_NO_WINDOW,
         check=False,
+        **get_hidden_process_options(),
     )
 
     return result.returncode == 0
 
 
 def check_dns(domain: str) -> dict:
-    """
-    Prüft, ob eine Domain per DNS aufgelöst werden kann.
-    """
+    """Prüft, ob eine Domain per DNS aufgelöst werden kann."""
 
     try:
         ip_address = socket.gethostbyname(domain)
@@ -49,9 +49,7 @@ def check_dns(domain: str) -> dict:
 
 
 def get_active_ip_address() -> str:
-    """
-    Ermittelt die aktive lokale IPv4-Adresse.
-    """
+    """Ermittelt die aktive lokale IPv4-Adresse."""
 
     temp_socket = socket.socket(
         socket.AF_INET,
@@ -59,10 +57,7 @@ def get_active_ip_address() -> str:
     )
 
     try:
-        temp_socket.connect(
-            ("8.8.8.8", 80)
-        )
-
+        temp_socket.connect(("8.8.8.8", 80))
         return temp_socket.getsockname()[0]
 
     except OSError:
@@ -73,9 +68,7 @@ def get_active_ip_address() -> str:
 
 
 def get_default_gateway() -> str:
-    """
-    Ermittelt das Standardgateway über PowerShell.
-    """
+    """Ermittelt das Standardgateway über PowerShell."""
 
     command = [
         "powershell.exe",
@@ -96,8 +89,8 @@ def get_default_gateway() -> str:
         text=True,
         encoding="utf-8",
         errors="ignore",
-        creationflags=subprocess.CREATE_NO_WINDOW,
         check=False,
+        **get_hidden_process_options(),
     )
 
     gateway = result.stdout.strip()
@@ -109,12 +102,9 @@ def get_default_gateway() -> str:
 
 
 def get_network_info() -> dict:
-    """
-    Führt grundlegende Netzwerkprüfungen durch.
-    """
+    """Führt grundlegende Netzwerkprüfungen durch."""
 
     dns_result = check_dns("google.com")
-
     google_ping = check_ping("8.8.8.8")
     cloudflare_ping = check_ping("1.1.1.1")
 
