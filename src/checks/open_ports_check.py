@@ -1,4 +1,5 @@
 import subprocess
+from src.utils.hidden_process import get_hidden_process_options
 
 
 SUSPICIOUS_PORTS = {
@@ -36,7 +37,7 @@ def run_powershell_command(command):
         text=True,
         encoding="utf-8",
         errors="ignore",
-        creationflags=subprocess.CREATE_NO_WINDOW,
+    **get_hidden_process_options(),
     )
 
     return result.stdout.strip()

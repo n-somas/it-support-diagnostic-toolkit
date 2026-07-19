@@ -98,7 +98,7 @@ class StatusBarChart(ctk.CTkFrame):
         """Erstellt das eingebettete Matplotlib-Diagramm."""
 
         self.figure = Figure(
-            figsize=(8.8, 2.8),
+            figsize=(8.8, 2.2),
             dpi=100,
         )
 
@@ -109,12 +109,15 @@ class StatusBarChart(ctk.CTkFrame):
             master=self,
         )
         self.canvas_widget = self.canvas.get_tk_widget()
+        self.canvas_widget.configure(
+            height=230,
+        )
         self.canvas_widget.grid(
             row=1,
             column=0,
             padx=14,
             pady=(4, 14),
-            sticky="nsew",
+            sticky="ew",
         )
 
         self.clear()
