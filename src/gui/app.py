@@ -9,6 +9,7 @@ import customtkinter as ctk
 from src.diagnostic_runner import run_all_diagnostics
 from src.gui.components.charts.status_bar_chart import StatusBarChart
 from src.gui.components.dashboard_extra_charts import DiskUsageChart, HistoryChart
+from src.gui.comparison_window import ComparisonWindow
 from src.services.scan_history_service import ScanHistoryService
 from src.gui.result_card import ResultCard
 from src.report.markdown_report import save_markdown_report
@@ -429,6 +430,19 @@ class DiagnosticApp(ctk.CTk):
             padx=6,
         )
 
+        self.compare_scans_button = ctk.CTkButton(
+            self.report_actions_frame,
+            text="Diagnosen vergleichen",
+            width=190,
+            height=38,
+            command=self._open_comparison,
+        )
+        self.compare_scans_button.grid(
+            row=0,
+            column=2,
+            padx=6,
+        )
+
         self.report_path_label = ctk.CTkLabel(
             master,
             text="",
@@ -629,6 +643,14 @@ class DiagnosticApp(ctk.CTk):
                 text=f"Bericht konnte nicht erstellt werden: {error}"
             )
             self.report_path_label.grid()
+
+    def _open_comparison(self) -> None:
+        """Öffnet den Vergleich gespeicherter Diagnoseläufe."""
+
+        ComparisonWindow(
+            self,
+            history_service=self.history_service,
+        )
 
     def _open_report(self) -> None:
         """Öffnet den zuletzt erstellten Bericht im Standardprogramm."""

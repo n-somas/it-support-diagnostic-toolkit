@@ -33,6 +33,8 @@ if (Test-Path ".\IT-Support-Diagnostic-Toolkit.spec") {
     --noconsole `
     --clean `
     --paths "." `
+    --hidden-import "src.services.scan_comparison_service" `
+    --hidden-import "src.gui.comparison_window" `
     --collect-all "customtkinter" `
     --collect-all "matplotlib" `
     "src\gui\app.py"
