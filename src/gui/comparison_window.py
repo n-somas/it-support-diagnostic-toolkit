@@ -10,6 +10,7 @@ import customtkinter as ctk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
+from src.report.comparison_report import save_comparison_report
 from src.services.scan_comparison_service import (
     ComparisonItem,
     ScanComparisonService,
@@ -192,7 +193,7 @@ class ComparisonWindow(ctk.CTkToplevel):
 
         self.export_button = ctk.CTkButton(
             actions,
-            text="Vergleich exportieren",
+            text="Professionellen Bericht exportieren",
             width=180,
             state="disabled",
             command=self._export,
@@ -849,70 +850,50 @@ class ComparisonWindow(ctk.CTkToplevel):
                 )
 
     def _export(self) -> None:
+        """Exportiert einen priorisierten Markdown-Vergleichsbericht."""
+
         if not self.current:
             return
 
+        suggested_name = (
+            "IT-Support-Diagnosevergleich_"
+            f"{datetime.now().strftime('%Y-%m-%d_%H-%M')}.md"
+        )
+
         path = filedialog.asksaveasfilename(
             parent=self,
-            title="Diagnosevergleich speichern",
+            title="Professionellen Diagnosevergleich speichern",
             defaultextension=".md",
             filetypes=[
-                ("Markdown", "*.md"),
-                ("Text", "*.txt"),
+                ("Markdown-Bericht", "*.md"),
+                ("Textdatei", "*.txt"),
             ],
-            initialfile="Diagnosevergleich.md",
+            initialfile=suggested_name,
         )
 
         if not path:
             return
 
-        lines = [
-            "# Vergleich zweier Diagnoseläufe",
-            "",
-            f"Älterer Scan: {self.current['old_created_at']}",
-            f"Neuerer Scan: {self.current['new_created_at']}",
-            "",
-            "## Zusammenfassung",
-            "",
-        ]
-
-        for change, count in self.current["summary"].items():
-            lines.append(
-                f"- {CHANGE_STYLES[change][0]}: {count}"
+        try:
+            saved_path = save_comparison_report(
+                self.current,
+                path,
             )
-
-        for item in self.current["items"]:
-            lines.extend(
-                [
-                    "",
-                    f"## {item.title}",
-                    "",
-                    f"- Status vorher: {item.old_status}",
-                    f"- Status nachher: {item.new_status}",
-                    f"- Bewertung: {CHANGE_STYLES[item.change][0]}",
-                    f"- Geänderte Werte: {item.changed_detail_count}",
-                    "",
-                    "| Eigenschaft | Älterer Scan | Neuerer Scan |",
-                    "|---|---|---|",
-                ]
+        except OSError as error:
+            messagebox.showerror(
+                "Export fehlgeschlagen",
+                str(error),
+                parent=self,
             )
-
-            for detail in item.detail_changes:
-                marker = " **geändert**" if detail.changed else ""
-                lines.append(
-                    f"| {detail.path}{marker} | "
-                    f"{self._escape(detail.old_value)} | "
-                    f"{self._escape(detail.new_value)} |"
-                )
-
-        Path(path).write_text(
-            "\n".join(lines) + "\n",
-            encoding="utf-8",
-        )
+            return
 
         messagebox.showinfo(
-            "Vergleich gespeichert",
-            f"Der Vergleich wurde gespeichert.\n\n{path}",
+            "Vergleichsbericht gespeichert",
+            (
+                "Der professionelle Vergleichsbericht "
+                "wurde gespeichert.\n\n"
+                f"{saved_path}"
+            ),
             parent=self,
         )
 
