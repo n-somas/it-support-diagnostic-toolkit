@@ -17,3 +17,7 @@ data/scans/
 # Lokale Sicherungen und Diagnosedaten
 backup_before_dashboard_upgrade/
 data/scans/
+
+# Lokale Upgrade-Skripte und Sicherungen
+backup_before_*/
+upgrade_*.py
