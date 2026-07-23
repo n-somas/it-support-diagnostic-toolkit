@@ -481,7 +481,7 @@ class DiagnosticApp(ctk.CTk):
 
             card = ctk.CTkFrame(
                 self.summary_frame,
-                height=104,
+                height=88,
                 corner_radius=12,
                 border_width=1,
                 border_color=Colors.BORDER,
@@ -505,7 +505,7 @@ class DiagnosticApp(ctk.CTk):
                 row=0,
                 column=0,
                 padx=10,
-                pady=(10, 4),
+                pady=(8, 2),
                 sticky="ew",
             )
 
@@ -514,7 +514,7 @@ class DiagnosticApp(ctk.CTk):
                 text="0",
                 text_color=Colors.TEXT,
                 font=ctk.CTkFont(
-                    size=25,
+                    size=22,
                     weight="bold",
                 ),
             )
@@ -540,11 +540,13 @@ class DiagnosticApp(ctk.CTk):
             self._bind_status_card(card, status)
 
 
+
     def _create_action_center(self, master) -> None:
-        """Erstellt die kompakte Übersicht zum aktuellen Handlungsbedarf."""
+        """Erstellt einen kompakten Bereich für aktuelle Probleme."""
 
         self.action_center_frame = ctk.CTkFrame(
             master,
+            height=164,
             corner_radius=14,
             border_width=1,
             border_color=Colors.BORDER,
@@ -553,9 +555,10 @@ class DiagnosticApp(ctk.CTk):
         self.action_center_frame.grid(
             row=2,
             column=0,
-            pady=(0, 14),
+            pady=(0, 12),
             sticky="ew",
         )
+        self.action_center_frame.grid_propagate(False)
         self.action_center_frame.grid_columnconfigure(0, weight=1)
 
         header = ctk.CTkFrame(
@@ -565,8 +568,8 @@ class DiagnosticApp(ctk.CTk):
         header.grid(
             row=0,
             column=0,
-            padx=18,
-            pady=(14, 8),
+            padx=16,
+            pady=(11, 6),
             sticky="ew",
         )
         header.grid_columnconfigure(0, weight=1)
@@ -576,28 +579,32 @@ class DiagnosticApp(ctk.CTk):
             text="Aktueller Handlungsbedarf",
             anchor="w",
             text_color=Colors.TEXT,
-            font=ctk.CTkFont(size=17, weight="bold"),
-        ).grid(row=0, column=0, sticky="w")
+            font=ctk.CTkFont(size=15, weight="bold"),
+        ).grid(
+            row=0,
+            column=0,
+            sticky="w",
+        )
 
         self.action_center_count_label = ctk.CTkLabel(
             header,
             text="Noch keine Diagnose durchgeführt",
             anchor="w",
             text_color=Colors.MUTED,
-            font=ctk.CTkFont(size=12),
+            font=ctk.CTkFont(size=11),
         )
         self.action_center_count_label.grid(
             row=1,
             column=0,
-            pady=(2, 0),
+            pady=(1, 0),
             sticky="w",
         )
 
         self.show_problems_button = ctk.CTkButton(
             header,
-            text="Alle Probleme anzeigen",
-            width=178,
-            height=34,
+            text="Alle Probleme",
+            width=125,
+            height=30,
             state="disabled",
             command=self._show_problem_results,
         )
@@ -605,8 +612,7 @@ class DiagnosticApp(ctk.CTk):
             row=0,
             column=1,
             rowspan=2,
-            padx=(14, 0),
-            sticky="e",
+            padx=(12, 0),
         )
 
         self.action_center_list = ctk.CTkFrame(
@@ -616,16 +622,22 @@ class DiagnosticApp(ctk.CTk):
         self.action_center_list.grid(
             row=1,
             column=0,
-            padx=12,
-            pady=(0, 12),
-            sticky="ew",
+            padx=11,
+            pady=(0, 10),
+            sticky="nsew",
         )
-        self.action_center_list.grid_columnconfigure(0, weight=1)
+
+        for column in range(MAX_DASHBOARD_FINDINGS):
+            self.action_center_list.grid_columnconfigure(
+                column,
+                weight=1,
+                uniform="dashboard_findings",
+            )
 
         self._reset_action_center()
 
     def _reset_action_center(self) -> None:
-        """Setzt das Aktionszentrum auf den Ausgangszustand zurück."""
+        """Zeigt den kompakten Ausgangszustand."""
 
         for widget in self.action_center_list.winfo_children():
             widget.destroy()
@@ -635,20 +647,38 @@ class DiagnosticApp(ctk.CTk):
         )
         self.show_problems_button.configure(state="disabled")
 
-        ctk.CTkLabel(
+        placeholder = ctk.CTkFrame(
             self.action_center_list,
+            height=76,
+            corner_radius=10,
+            border_width=1,
+            border_color=Colors.BORDER,
+            fg_color=("gray96", "gray17"),
+        )
+        placeholder.grid(
+            row=0,
+            column=0,
+            columnspan=MAX_DASHBOARD_FINDINGS,
+            padx=4,
+            sticky="ew",
+        )
+        placeholder.grid_propagate(False)
+        placeholder.grid_columnconfigure(0, weight=1)
+
+        ctk.CTkLabel(
+            placeholder,
             text=(
-                "Nach der Diagnose erscheinen hier nur Ergebnisse "
-                "mit tatsächlichem Handlungsbedarf."
+                "Nach der Diagnose werden hier ausschließlich "
+                "Warnungen, kritische Ergebnisse und Fehler angezeigt."
             ),
             anchor="w",
             text_color=Colors.MUTED,
-            font=ctk.CTkFont(size=13),
+            font=ctk.CTkFont(size=12),
         ).grid(
             row=0,
             column=0,
-            padx=8,
-            pady=12,
+            padx=14,
+            pady=25,
             sticky="w",
         )
 
@@ -656,7 +686,7 @@ class DiagnosticApp(ctk.CTk):
         self,
         results: list[tuple[str, dict]],
     ) -> None:
-        """Zeigt die wichtigsten problematischen Diagnosebereiche."""
+        """Zeigt maximal drei Problemkarten nebeneinander."""
 
         for widget in self.action_center_list.winfo_children():
             widget.destroy()
@@ -675,113 +705,107 @@ class DiagnosticApp(ctk.CTk):
 
         if not findings:
             self.action_center_count_label.configure(
-                text="Kein unmittelbarer Handlungsbedarf erkannt"
+                text="Kein unmittelbarer Handlungsbedarf"
             )
             self.show_problems_button.configure(state="disabled")
 
             clean_card = ctk.CTkFrame(
                 self.action_center_list,
+                height=76,
                 corner_radius=10,
-                fg_color=("#ECFDF5", "#052E24"),
                 border_width=1,
                 border_color=("#86EFAC", "#166534"),
+                fg_color=("#ECFDF5", "#052E24"),
             )
             clean_card.grid(
                 row=0,
                 column=0,
-                padx=6,
-                pady=5,
+                columnspan=MAX_DASHBOARD_FINDINGS,
+                padx=4,
                 sticky="ew",
             )
+            clean_card.grid_propagate(False)
+            clean_card.grid_columnconfigure(0, weight=1)
 
             ctk.CTkLabel(
                 clean_card,
-                text="Keine Warnungen, kritischen Ergebnisse oder Fehler.",
+                text="Keine Warnungen, kritischen Ergebnisse oder Fehler erkannt.",
                 anchor="w",
                 text_color=("#166534", "#86EFAC"),
-                font=ctk.CTkFont(size=13, weight="bold"),
+                font=ctk.CTkFont(size=12, weight="bold"),
             ).grid(
                 row=0,
                 column=0,
                 padx=14,
-                pady=13,
+                pady=25,
                 sticky="w",
             )
             return
 
         count = len(findings)
         noun = "Problem" if count == 1 else "Probleme"
+        visible_count = min(count, MAX_DASHBOARD_FINDINGS)
+
         self.action_center_count_label.configure(
-            text=f"{count} {noun} im aktuellen Diagnoselauf"
+            text=(
+                f"{count} {noun} erkannt"
+                + (
+                    f" – die wichtigsten {visible_count} werden angezeigt"
+                    if count > MAX_DASHBOARD_FINDINGS
+                    else ""
+                )
+            )
         )
         self.show_problems_button.configure(state="normal")
 
-        for row, (title, result, status) in enumerate(
+        for column, (title, result, status) in enumerate(
             findings[:MAX_DASHBOARD_FINDINGS]
         ):
             self._create_action_item(
-                row,
-                title,
-                result,
-                status,
-            )
-
-        hidden_count = count - MAX_DASHBOARD_FINDINGS
-        if hidden_count > 0:
-            ctk.CTkLabel(
-                self.action_center_list,
-                text=(
-                    f"{hidden_count} weitere problematische "
-                    "Diagnosebereiche sind im Ergebnisbereich sichtbar."
-                ),
-                anchor="w",
-                text_color=Colors.MUTED,
-                font=ctk.CTkFont(size=12),
-            ).grid(
-                row=MAX_DASHBOARD_FINDINGS,
-                column=0,
-                padx=10,
-                pady=(6, 2),
-                sticky="w",
+                column=column,
+                title=title,
+                result=result,
+                status=status,
             )
 
     def _create_action_item(
         self,
-        row: int,
+        column: int,
         title: str,
         result: dict,
         status: str,
     ) -> None:
-        """Erstellt eine kompakte Zeile für einen problematischen Bereich."""
+        """Erstellt eine kompakte Problemkarte."""
 
         style = SUMMARY_STYLES[status]
 
         item = ctk.CTkFrame(
             self.action_center_list,
+            height=76,
             corner_radius=10,
             border_width=1,
             border_color=Colors.BORDER,
             fg_color=("gray96", "gray17"),
         )
         item.grid(
-            row=row,
-            column=0,
-            padx=6,
-            pady=4,
+            row=0,
+            column=column,
+            padx=4,
             sticky="ew",
         )
+        item.grid_propagate(False)
         item.grid_columnconfigure(1, weight=1)
 
         ctk.CTkFrame(
             item,
-            width=6,
-            corner_radius=4,
+            width=5,
+            corner_radius=3,
             fg_color=style["color"],
         ).grid(
             row=0,
             column=0,
             rowspan=2,
-            padx=(0, 12),
+            padx=(0, 10),
             pady=7,
             sticky="ns",
         )
@@ -791,11 +815,11 @@ class DiagnosticApp(ctk.CTk):
             text=title,
             anchor="w",
             text_color=Colors.TEXT,
-            font=ctk.CTkFont(size=13, weight="bold"),
+            font=ctk.CTkFont(size=12, weight="bold"),
         ).grid(
             row=0,
             column=1,
-            padx=(0, 10),
+            padx=(0, 6),
             pady=(9, 1),
             sticky="w",
         )
@@ -804,38 +828,26 @@ class DiagnosticApp(ctk.CTk):
             item,
             text=self._problem_summary(result),
             anchor="w",
+            justify="left",
+            wraplength=235,
             text_color=Colors.MUTED,
-            font=ctk.CTkFont(size=12),
+            font=ctk.CTkFont(size=10),
         ).grid(
             row=1,
             column=1,
-            padx=(0, 10),
-            pady=(0, 9),
+            padx=(0, 6),
+            pady=(0, 8),
             sticky="w",
-        )
-
-        ctk.CTkLabel(
-            item,
-            text=style["label"],
-            width=88,
-            height=26,
-            corner_radius=7,
-            fg_color=style["color"],
-            text_color="white",
-            font=ctk.CTkFont(size=11, weight="bold"),
-        ).grid(
-            row=0,
-            column=2,
-            rowspan=2,
-            padx=6,
-            pady=10,
         )
 
         ctk.CTkButton(
             item,
             text="Details",
-            width=92,
-            height=30,
+            width=64,
+            height=26,
+            font=ctk.CTkFont(size=10),
+            fg_color=style["color"],
+            hover_color=style["color"],
             command=lambda: self._open_action_details(
                 title,
                 result,
@@ -843,10 +855,10 @@ class DiagnosticApp(ctk.CTk):
             ),
         ).grid(
             row=0,
-            column=3,
+            column=2,
             rowspan=2,
-            padx=(6, 12),
-            pady=10,
+            padx=(4, 9),
+            pady=24,
         )
 
     def _open_action_details(
@@ -876,7 +888,7 @@ class DiagnosticApp(ctk.CTk):
 
     @staticmethod
     def _problem_summary(result: dict) -> str:
-        """Erstellt eine kurze Vorschau für das Dashboard."""
+        """Erstellt eine kurze Problemvorschau."""
 
         preferred_keys = (
             "Hinweis",
@@ -891,7 +903,11 @@ class DiagnosticApp(ctk.CTk):
 
             if isinstance(value, str) and value.strip():
                 text = " ".join(value.split())
-                return text[:115] + " ..." if len(text) > 118 else text
+                return (
+                    text[:72] + " ..."
+                    if len(text) > 75
+                    else text
+                )
 
         for key, value in result.items():
             if key in {"Bewertung", "Status"}:
@@ -902,8 +918,8 @@ class DiagnosticApp(ctk.CTk):
 
             preview = f"{key}: {' '.join(str(value).split())}"
             return (
-                preview[:115] + " ..."
-                if len(preview) > 118
+                preview[:72] + " ..."
+                if len(preview) > 75
                 else preview
             )
 
