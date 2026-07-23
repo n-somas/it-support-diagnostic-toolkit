@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import os
+
 from typing import Any
 
 import customtkinter as ctk
+from tkinter import messagebox
 
 from src.gui.detail_window import ResultDetailWindow
 from src.gui.theme import Colors
@@ -49,6 +52,7 @@ class HardwarePage(ctk.CTkFrame):
         self._create_system_header()
         self._create_metric_row()
         self._create_detail_tabs()
+        self._create_update_actions()
         self.reset()
 
     def _create_system_header(self) -> None:
@@ -416,6 +420,109 @@ class HardwarePage(ctk.CTkFrame):
 
         self.detail_panels[key] = panel
         self.detail_labels[key] = label
+
+    def _create_update_actions(self) -> None:
+        # Direkte Verknüpfungen zu Windows Update.
+        frame = ctk.CTkFrame(
+            self,
+            corner_radius=12,
+            border_width=1,
+            border_color=Colors.BORDER,
+            fg_color=Colors.SURFACE,
+        )
+        frame.grid(
+            row=3,
+            column=0,
+            columnspan=2,
+            pady=(12, 0),
+            sticky="ew",
+        )
+        frame.grid_columnconfigure(0, weight=1)
+
+        ctk.CTkLabel(
+            frame,
+            text="Update-Aktionen",
+            anchor="w",
+            text_color=Colors.TEXT,
+            font=ctk.CTkFont(size=14, weight="bold"),
+        ).grid(
+            row=0,
+            column=0,
+            padx=16,
+            pady=(12, 2),
+            sticky="w",
+        )
+
+        ctk.CTkLabel(
+            frame,
+            text=(
+                "Öffnet die passenden Windows-Einstellungen. "
+                "Installation und Neustart bleiben unter deiner Kontrolle."
+            ),
+            anchor="w",
+            text_color=Colors.MUTED,
+            font=ctk.CTkFont(size=11),
+        ).grid(
+            row=1,
+            column=0,
+            padx=16,
+            pady=(0, 12),
+            sticky="w",
+        )
+
+        ctk.CTkButton(
+            frame,
+            text="Windows Update öffnen",
+            width=180,
+            height=34,
+            command=self._open_windows_update,
+        ).grid(
+            row=0,
+            column=1,
+            rowspan=2,
+            padx=(8, 6),
+            pady=13,
+        )
+
+        ctk.CTkButton(
+            frame,
+            text="Optionale Updates",
+            width=160,
+            height=34,
+            command=self._open_optional_updates,
+        ).grid(
+            row=0,
+            column=2,
+            rowspan=2,
+            padx=(6, 16),
+            pady=13,
+        )
+
+    def _open_windows_update(self) -> None:
+        self._open_settings_uri(
+            "ms-settings:windowsupdate",
+            "Windows Update",
+        )
+
+    def _open_optional_updates(self) -> None:
+        self._open_settings_uri(
+            "ms-settings:windowsupdate-optionalupdates",
+            "Optionale Updates",
+        )
+
+    def _open_settings_uri(
+        self,
+        uri: str,
+        title: str,
+    ) -> None:
+        try:
+            os.startfile(uri)
+        except OSError as error:
+            messagebox.showerror(
+                f"{title} konnte nicht geöffnet werden",
+                str(error),
+                parent=self.winfo_toplevel(),
+            )
 
     def reset(self) -> None:
         self.hardware_result = {}

@@ -11,7 +11,7 @@ from tkinter import filedialog, messagebox
 import customtkinter as ctk
 
 from src.diagnostic_runner import run_all_diagnostics
-from src.gui.comparison_window import ComparisonWindow
+from src.gui.comparison_page import ComparisonPage
 from src.gui.detail_window import ResultDetailWindow
 from src.gui.components.charts.status_bar_chart import StatusBarChart
 from src.gui.components.dashboard_extra_charts import (
@@ -68,6 +68,10 @@ PAGE_TITLES = {
     "history": (
         "Verlauf und Vergleich",
         "Entwicklung der letzten Diagnosen nachvollziehen",
+    ),
+    "comparison": (
+        "Diagnosevergleich",
+        "Zwei gespeicherte Diagnoseläufe direkt vergleichen",
     ),
     "reports": (
         "Berichte",
@@ -130,6 +134,7 @@ class DiagnosticApp(ctk.CTk):
         self._create_results_page()
         self._create_hardware_page()
         self._create_history_page()
+        self._create_comparison_page()
         self._create_reports_page()
 
     def _create_sidebar(self) -> None:
@@ -861,6 +866,44 @@ class DiagnosticApp(ctk.CTk):
             pady=24,
         )
 
+        self._bind_action_card(
+            item,
+            title,
+            result,
+            status,
+        )
+
+    def _bind_action_card(
+        self,
+        widget,
+        title: str,
+        result: dict,
+        status: str,
+    ) -> None:
+        # Macht eine Problemkarte vollständig anklickbar.
+        if not isinstance(widget, ctk.CTkButton):
+            widget.bind(
+                "<Button-1>",
+                lambda event: self._open_action_details(
+                    title,
+                    result,
+                    status,
+                ),
+            )
+
+            try:
+                widget.configure(cursor="hand2")
+            except (TypeError, ValueError):
+                pass
+
+        for child in widget.winfo_children():
+            self._bind_action_card(
+                child,
+                title,
+                result,
+                status,
+            )
+
     def _open_action_details(
         self,
         title: str,
@@ -1202,6 +1245,26 @@ class DiagnosticApp(ctk.CTk):
             rowspan=2,
             padx=18,
             pady=14,
+        )
+
+    def _create_comparison_page(self) -> None:
+        # Erstellt den Diagnosevergleich im Hauptfenster.
+        page = self._new_page("comparison")
+        self._create_page_header(
+            page,
+            "comparison",
+            action_text="Zurück zum Verlauf",
+            action_command=lambda: self._show_page("history"),
+        )
+
+        self.comparison_page = ComparisonPage(
+            page,
+            history_service=self.history_service,
+        )
+        self.comparison_page.grid(
+            row=1,
+            column=0,
+            sticky="nsew",
         )
 
     def _create_reports_page(self) -> None:
@@ -1614,10 +1677,9 @@ class DiagnosticApp(ctk.CTk):
         self.history_count_label.configure(text=text)
 
     def _open_comparison(self) -> None:
-        ComparisonWindow(
-            self,
-            history_service=self.history_service,
-        )
+        # Öffnet den Vergleich als Seite der Hauptanwendung.
+        self.comparison_page.refresh_options()
+        self._show_page("comparison")
 
     def _open_report(self) -> None:
         if self.latest_report_path is None:
