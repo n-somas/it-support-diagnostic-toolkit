@@ -904,6 +904,37 @@ class DiagnosticApp(ctk.CTk):
                 status,
             )
 
+    def _bind_action_card(
+        self,
+        widget,
+        title: str,
+        result: dict,
+        status: str,
+    ) -> None:
+        # Macht eine Problemkarte vollständig anklickbar.
+        if not isinstance(widget, ctk.CTkButton):
+            widget.bind(
+                "<Button-1>",
+                lambda event: self._open_action_details(
+                    title,
+                    result,
+                    status,
+                ),
+            )
+
+            try:
+                widget.configure(cursor="hand2")
+            except (TypeError, ValueError):
+                pass
+
+        for child in widget.winfo_children():
+            self._bind_action_card(
+                child,
+                title,
+                result,
+                status,
+            )
+
     def _open_action_details(
         self,
         title: str,
