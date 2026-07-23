@@ -6,6 +6,7 @@ from src.checks.bitlocker_check import get_bitlocker_info
 from src.checks.defender_check import get_defender_info
 from src.checks.disk_check import get_disk_info
 from src.checks.firewall_check import get_firewall_info
+from src.checks.hardware_check import get_hardware_info
 from src.checks.network_check import get_network_info
 from src.checks.open_ports_check import get_open_ports_info
 from src.checks.system_info import get_system_info
@@ -16,6 +17,7 @@ ProgressCallback = Callable[[str, int, int], None]
 
 DIAGNOSTIC_CHECKS = [
     ("Systeminformationen", get_system_info),
+    ("Hardwareinventar", get_hardware_info),
     ("Netzwerkprüfung", get_network_info),
     ("Speicherplatzprüfung", get_disk_info),
     ("Firewallprüfung", get_firewall_info),

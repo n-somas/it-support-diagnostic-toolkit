@@ -12,12 +12,14 @@ import customtkinter as ctk
 
 from src.diagnostic_runner import run_all_diagnostics
 from src.gui.comparison_window import ComparisonWindow
+from src.gui.detail_window import ResultDetailWindow
 from src.gui.components.charts.status_bar_chart import StatusBarChart
 from src.gui.components.dashboard_extra_charts import (
     DiskUsageChart,
     HistoryChart,
 )
 from src.gui.result_card import ResultCard
+from src.gui.hardware_page import HardwarePage
 from src.gui.theme import Colors
 from src.report.markdown_report import save_markdown_report
 from src.services.scan_history_service import ScanHistoryService
@@ -59,6 +61,10 @@ PAGE_TITLES = {
         "Diagnoseergebnisse",
         "Prüfbereiche filtern und Details gezielt öffnen",
     ),
+    "hardware": (
+        "Hardware und Updates",
+        "Verbaute Komponenten und Aktualisierungsbedarf",
+    ),
     "history": (
         "Verlauf und Vergleich",
         "Entwicklung der letzten Diagnosen nachvollziehen",
@@ -68,6 +74,16 @@ PAGE_TITLES = {
         "Diagnoseberichte öffnen, speichern und weitergeben",
     ),
 }
+
+PROBLEM_STATUSES = {"WARNUNG", "KRITISCH", "FEHLER"}
+
+PROBLEM_STATUS_ORDER = {
+    "FEHLER": 0,
+    "KRITISCH": 1,
+    "WARNUNG": 2,
+}
+
+MAX_DASHBOARD_FINDINGS = 3
 
 
 class DiagnosticApp(ctk.CTk):
@@ -112,6 +128,7 @@ class DiagnosticApp(ctk.CTk):
         self._create_page_container()
         self._create_dashboard_page()
         self._create_results_page()
+        self._create_hardware_page()
         self._create_history_page()
         self._create_reports_page()
 
@@ -131,53 +148,12 @@ class DiagnosticApp(ctk.CTk):
         self.sidebar.grid_columnconfigure(0, weight=1)
         self.sidebar.grid_rowconfigure(8, weight=1)
 
-        brand = ctk.CTkFrame(
-            self.sidebar,
-            fg_color="transparent",
-        )
-        brand.grid(
-            row=0,
-            column=0,
-            padx=20,
-            pady=(24, 26),
-            sticky="ew",
-        )
-
-        ctk.CTkLabel(
-            brand,
-            text="IT SUPPORT",
-            anchor="w",
-            text_color="#93C5FD",
-            font=ctk.CTkFont(
-                size=12,
-                weight="bold",
-            ),
-        ).grid(
-            row=0,
-            column=0,
-            sticky="w",
-        )
-
-        ctk.CTkLabel(
-            brand,
-            text="Diagnostic\nToolkit",
-            anchor="w",
-            justify="left",
-            text_color="#F8FAFC",
-            font=ctk.CTkFont(
-                size=25,
-                weight="bold",
-            ),
-        ).grid(
-            row=1,
-            column=0,
-            pady=(3, 0),
-            sticky="w",
-        )
+        self.sidebar.grid_rowconfigure(0, minsize=18)
 
         nav_entries = (
             ("dashboard", "Übersicht"),
             ("results", "Ergebnisse"),
+            ("hardware", "Hardware & Updates"),
             ("history", "Verlauf & Vergleich"),
             ("reports", "Berichte"),
         )
@@ -376,12 +352,7 @@ class DiagnosticApp(ctk.CTk):
 
     def _create_dashboard_page(self) -> None:
         page = self._new_page("dashboard")
-        self._create_page_header(
-            page,
-            "dashboard",
-            action_text="Diagnose starten",
-            action_command=self._start_scan,
-        )
+        self._create_page_header(page, "dashboard")
 
         body = ctk.CTkFrame(
             page,
@@ -397,6 +368,7 @@ class DiagnosticApp(ctk.CTk):
 
         self._create_scan_panel(body)
         self._create_summary_cards(body)
+        self._create_action_center(body)
         self._create_dashboard_charts(body)
 
     def _create_scan_panel(self, master) -> None:
@@ -567,13 +539,383 @@ class DiagnosticApp(ctk.CTk):
             self.summary_cards[status] = card
             self._bind_status_card(card, status)
 
+
+    def _create_action_center(self, master) -> None:
+        """Erstellt die kompakte Übersicht zum aktuellen Handlungsbedarf."""
+
+        self.action_center_frame = ctk.CTkFrame(
+            master,
+            corner_radius=14,
+            border_width=1,
+            border_color=Colors.BORDER,
+            fg_color=Colors.SURFACE,
+        )
+        self.action_center_frame.grid(
+            row=2,
+            column=0,
+            pady=(0, 14),
+            sticky="ew",
+        )
+        self.action_center_frame.grid_columnconfigure(0, weight=1)
+
+        header = ctk.CTkFrame(
+            self.action_center_frame,
+            fg_color="transparent",
+        )
+        header.grid(
+            row=0,
+            column=0,
+            padx=18,
+            pady=(14, 8),
+            sticky="ew",
+        )
+        header.grid_columnconfigure(0, weight=1)
+
+        ctk.CTkLabel(
+            header,
+            text="Aktueller Handlungsbedarf",
+            anchor="w",
+            text_color=Colors.TEXT,
+            font=ctk.CTkFont(size=17, weight="bold"),
+        ).grid(row=0, column=0, sticky="w")
+
+        self.action_center_count_label = ctk.CTkLabel(
+            header,
+            text="Noch keine Diagnose durchgeführt",
+            anchor="w",
+            text_color=Colors.MUTED,
+            font=ctk.CTkFont(size=12),
+        )
+        self.action_center_count_label.grid(
+            row=1,
+            column=0,
+            pady=(2, 0),
+            sticky="w",
+        )
+
+        self.show_problems_button = ctk.CTkButton(
+            header,
+            text="Alle Probleme anzeigen",
+            width=178,
+            height=34,
+            state="disabled",
+            command=self._show_problem_results,
+        )
+        self.show_problems_button.grid(
+            row=0,
+            column=1,
+            rowspan=2,
+            padx=(14, 0),
+            sticky="e",
+        )
+
+        self.action_center_list = ctk.CTkFrame(
+            self.action_center_frame,
+            fg_color="transparent",
+        )
+        self.action_center_list.grid(
+            row=1,
+            column=0,
+            padx=12,
+            pady=(0, 12),
+            sticky="ew",
+        )
+        self.action_center_list.grid_columnconfigure(0, weight=1)
+
+        self._reset_action_center()
+
+    def _reset_action_center(self) -> None:
+        """Setzt das Aktionszentrum auf den Ausgangszustand zurück."""
+
+        for widget in self.action_center_list.winfo_children():
+            widget.destroy()
+
+        self.action_center_count_label.configure(
+            text="Noch keine Diagnose durchgeführt"
+        )
+        self.show_problems_button.configure(state="disabled")
+
+        ctk.CTkLabel(
+            self.action_center_list,
+            text=(
+                "Nach der Diagnose erscheinen hier nur Ergebnisse "
+                "mit tatsächlichem Handlungsbedarf."
+            ),
+            anchor="w",
+            text_color=Colors.MUTED,
+            font=ctk.CTkFont(size=13),
+        ).grid(
+            row=0,
+            column=0,
+            padx=8,
+            pady=12,
+            sticky="w",
+        )
+
+    def _update_action_center(
+        self,
+        results: list[tuple[str, dict]],
+    ) -> None:
+        """Zeigt die wichtigsten problematischen Diagnosebereiche."""
+
+        for widget in self.action_center_list.winfo_children():
+            widget.destroy()
+
+        findings = [
+            (title, result, self._get_rating(result))
+            for title, result in results
+            if self._get_rating(result) in PROBLEM_STATUSES
+        ]
+        findings.sort(
+            key=lambda item: (
+                PROBLEM_STATUS_ORDER.get(item[2], 9),
+                item[0].casefold(),
+            )
+        )
+
+        if not findings:
+            self.action_center_count_label.configure(
+                text="Kein unmittelbarer Handlungsbedarf erkannt"
+            )
+            self.show_problems_button.configure(state="disabled")
+
+            clean_card = ctk.CTkFrame(
+                self.action_center_list,
+                corner_radius=10,
+                fg_color=("#ECFDF5", "#052E24"),
+                border_width=1,
+                border_color=("#86EFAC", "#166534"),
+            )
+            clean_card.grid(
+                row=0,
+                column=0,
+                padx=6,
+                pady=5,
+                sticky="ew",
+            )
+
+            ctk.CTkLabel(
+                clean_card,
+                text="Keine Warnungen, kritischen Ergebnisse oder Fehler.",
+                anchor="w",
+                text_color=("#166534", "#86EFAC"),
+                font=ctk.CTkFont(size=13, weight="bold"),
+            ).grid(
+                row=0,
+                column=0,
+                padx=14,
+                pady=13,
+                sticky="w",
+            )
+            return
+
+        count = len(findings)
+        noun = "Problem" if count == 1 else "Probleme"
+        self.action_center_count_label.configure(
+            text=f"{count} {noun} im aktuellen Diagnoselauf"
+        )
+        self.show_problems_button.configure(state="normal")
+
+        for row, (title, result, status) in enumerate(
+            findings[:MAX_DASHBOARD_FINDINGS]
+        ):
+            self._create_action_item(
+                row,
+                title,
+                result,
+                status,
+            )
+
+        hidden_count = count - MAX_DASHBOARD_FINDINGS
+        if hidden_count > 0:
+            ctk.CTkLabel(
+                self.action_center_list,
+                text=(
+                    f"{hidden_count} weitere problematische "
+                    "Diagnosebereiche sind im Ergebnisbereich sichtbar."
+                ),
+                anchor="w",
+                text_color=Colors.MUTED,
+                font=ctk.CTkFont(size=12),
+            ).grid(
+                row=MAX_DASHBOARD_FINDINGS,
+                column=0,
+                padx=10,
+                pady=(6, 2),
+                sticky="w",
+            )
+
+    def _create_action_item(
+        self,
+        row: int,
+        title: str,
+        result: dict,
+        status: str,
+    ) -> None:
+        """Erstellt eine kompakte Zeile für einen problematischen Bereich."""
+
+        style = SUMMARY_STYLES[status]
+
+        item = ctk.CTkFrame(
+            self.action_center_list,
+            corner_radius=10,
+            border_width=1,
+            border_color=Colors.BORDER,
+            fg_color=("gray96", "gray17"),
+        )
+        item.grid(
+            row=row,
+            column=0,
+            padx=6,
+            pady=4,
+            sticky="ew",
+        )
+        item.grid_columnconfigure(1, weight=1)
+
+        ctk.CTkFrame(
+            item,
+            width=6,
+            corner_radius=4,
+            fg_color=style["color"],
+        ).grid(
+            row=0,
+            column=0,
+            rowspan=2,
+            padx=(0, 12),
+            pady=7,
+            sticky="ns",
+        )
+
+        ctk.CTkLabel(
+            item,
+            text=title,
+            anchor="w",
+            text_color=Colors.TEXT,
+            font=ctk.CTkFont(size=13, weight="bold"),
+        ).grid(
+            row=0,
+            column=1,
+            padx=(0, 10),
+            pady=(9, 1),
+            sticky="w",
+        )
+
+        ctk.CTkLabel(
+            item,
+            text=self._problem_summary(result),
+            anchor="w",
+            text_color=Colors.MUTED,
+            font=ctk.CTkFont(size=12),
+        ).grid(
+            row=1,
+            column=1,
+            padx=(0, 10),
+            pady=(0, 9),
+            sticky="w",
+        )
+
+        ctk.CTkLabel(
+            item,
+            text=style["label"],
+            width=88,
+            height=26,
+            corner_radius=7,
+            fg_color=style["color"],
+            text_color="white",
+            font=ctk.CTkFont(size=11, weight="bold"),
+        ).grid(
+            row=0,
+            column=2,
+            rowspan=2,
+            padx=6,
+            pady=10,
+        )
+
+        ctk.CTkButton(
+            item,
+            text="Details",
+            width=92,
+            height=30,
+            command=lambda: self._open_action_details(
+                title,
+                result,
+                status,
+            ),
+        ).grid(
+            row=0,
+            column=3,
+            rowspan=2,
+            padx=(6, 12),
+            pady=10,
+        )
+
+    def _open_action_details(
+        self,
+        title: str,
+        result: dict,
+        status: str,
+    ) -> None:
+        """Öffnet die vollständigen Details eines Dashboard-Hinweises."""
+
+        ResultDetailWindow(
+            master=self,
+            title=title,
+            result=result,
+            status_color=SUMMARY_STYLES[status]["color"],
+        )
+
+    def _show_problem_results(self) -> None:
+        """Öffnet alle problematischen Ergebnisse im Ergebnisbereich."""
+
+        if not self.diagnostic_results:
+            return
+
+        self.active_status_filter = "PROBLEME"
+        self._apply_result_filter()
+        self._show_page("results")
+
+    @staticmethod
+    def _problem_summary(result: dict) -> str:
+        """Erstellt eine kurze Vorschau für das Dashboard."""
+
+        preferred_keys = (
+            "Hinweis",
+            "Empfehlung",
+            "Zusammenfassung",
+            "Ergebnis",
+            "Details",
+        )
+
+        for key in preferred_keys:
+            value = result.get(key)
+
+            if isinstance(value, str) and value.strip():
+                text = " ".join(value.split())
+                return text[:115] + " ..." if len(text) > 118 else text
+
+        for key, value in result.items():
+            if key in {"Bewertung", "Status"}:
+                continue
+
+            if value is None or value == "":
+                continue
+
+            preview = f"{key}: {' '.join(str(value).split())}"
+            return (
+                preview[:115] + " ..."
+                if len(preview) > 118
+                else preview
+            )
+
+        return "Details des Diagnosebereichs prüfen."
+
     def _create_dashboard_charts(self, master) -> None:
         charts = ctk.CTkFrame(
             master,
             fg_color="transparent",
         )
         charts.grid(
-            row=2,
+            row=3,
             column=0,
             sticky="nsew",
         )
@@ -630,7 +972,7 @@ class DiagnosticApp(ctk.CTk):
             pady=(0, 10),
             sticky="ew",
         )
-        filter_bar.grid_columnconfigure(7, weight=1)
+        filter_bar.grid_columnconfigure(9, weight=1)
 
         ctk.CTkLabel(
             filter_bar,
@@ -663,9 +1005,30 @@ class DiagnosticApp(ctk.CTk):
         )
         self.result_filter_buttons["ALL"] = all_button
 
+        problem_button = ctk.CTkButton(
+            filter_bar,
+            text="Probleme",
+            width=92,
+            height=31,
+            corner_radius=7,
+            fg_color="transparent",
+            border_width=1,
+            border_color=Colors.BORDER,
+            text_color=Colors.TEXT,
+            hover_color=("#FEE2E2", "#450A0A"),
+            command=lambda: self._set_status_filter("PROBLEME"),
+        )
+        problem_button.grid(
+            row=0,
+            column=2,
+            padx=3,
+            pady=10,
+        )
+        self.result_filter_buttons["PROBLEME"] = problem_button
+
         for column, status in enumerate(
             SUMMARY_STYLES,
-            start=2,
+            start=3,
         ):
             button = ctk.CTkButton(
                 filter_bar,
@@ -720,6 +1083,18 @@ class DiagnosticApp(ctk.CTk):
 
         self._show_results_placeholder()
         self._update_filter_buttons()
+
+
+    def _create_hardware_page(self) -> None:
+        page = self._new_page("hardware")
+        self._create_page_header(page, "hardware")
+
+        self.hardware_page = HardwarePage(page)
+        self.hardware_page.grid(
+            row=1,
+            column=0,
+            sticky="nsew",
+        )
 
     def _create_history_page(self) -> None:
         page = self._new_page("history")
@@ -1045,6 +1420,8 @@ class DiagnosticApp(ctk.CTk):
             "nach Abschluss."
         )
         self._reset_summary_dashboard()
+        self.hardware_page.reset()
+        self._reset_action_center()
 
         self.active_status_filter = None
         self._update_filter_buttons()
@@ -1152,9 +1529,11 @@ class DiagnosticApp(ctk.CTk):
         )
 
         self._update_summary_dashboard(status_counts)
+        self._update_action_center(results)
         self.active_status_filter = None
         self._update_filter_buttons()
         self._display_results(results)
+        self.hardware_page.update_from_results(results)
 
         try:
             self.history_service.save(results)
@@ -1389,6 +1768,12 @@ class DiagnosticApp(ctk.CTk):
 
         if self.active_status_filter is None:
             filtered_results = self.diagnostic_results
+        elif self.active_status_filter == "PROBLEME":
+            filtered_results = [
+                (title, result)
+                for title, result in self.diagnostic_results
+                if self._get_rating(result) in PROBLEM_STATUSES
+            ]
         else:
             filtered_results = [
                 (title, result)
@@ -1411,11 +1796,12 @@ class DiagnosticApp(ctk.CTk):
             self.result_filter_buttons.items()
         ):
             active = key == active_key
-            accent = (
-                "#2563EB"
-                if key == "ALL"
-                else SUMMARY_STYLES[key]["color"]
-            )
+            if key == "ALL":
+                accent = "#2563EB"
+            elif key == "PROBLEME":
+                accent = ("#B91C1C", "#EF4444")
+            else:
+                accent = SUMMARY_STYLES[key]["color"]
 
             button.configure(
                 fg_color=accent if active else "transparent",
@@ -1433,9 +1819,13 @@ class DiagnosticApp(ctk.CTk):
         visible = len(results)
 
         if self.active_status_filter:
-            label = SUMMARY_STYLES[
-                self.active_status_filter
-            ]["label"]
+            label = (
+                "Probleme"
+                if self.active_status_filter == "PROBLEME"
+                else SUMMARY_STYLES[
+                    self.active_status_filter
+                ]["label"]
+            )
             self.results_overview_label.configure(
                 text=(
                     f"{visible} von {total} Prüfungen angezeigt "
