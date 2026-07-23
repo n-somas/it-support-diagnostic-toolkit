@@ -21,3 +21,5 @@ data/scans/
 # Lokale Upgrade-Skripte und Sicherungen
 backup_before_*/
 upgrade_*.py
+
+upgrade_*.pyz
