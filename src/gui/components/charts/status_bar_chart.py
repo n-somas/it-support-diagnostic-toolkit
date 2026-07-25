@@ -1,8 +1,10 @@
-﻿from collections.abc import Mapping
+from collections.abc import Mapping
 
 import customtkinter as ctk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
+
+from src.gui.theme import Colors
 
 
 STATUS_ORDER = [
@@ -39,8 +41,10 @@ class StatusBarChart(ctk.CTkFrame):
     def __init__(self, master) -> None:
         super().__init__(
             master,
-            corner_radius=10,
+            corner_radius=16,
             border_width=1,
+            border_color=Colors.BORDER,
+            fg_color=Colors.SURFACE_RAISED,
         )
 
         self.grid_columnconfigure(0, weight=1)
@@ -84,7 +88,7 @@ class StatusBarChart(ctk.CTkFrame):
             header,
             text="Ergebnisse des aktuellen Diagnoselaufs",
             anchor="w",
-            text_color=("gray40", "gray70"),
+            text_color=Colors.MUTED,
             font=ctk.CTkFont(size=12),
         )
         description_label.grid(
@@ -110,7 +114,7 @@ class StatusBarChart(ctk.CTkFrame):
         )
         self.canvas_widget = self.canvas.get_tk_widget()
         self.canvas_widget.configure(
-            height=230,
+            height=220,
         )
         self.canvas_widget.grid(
             row=1,
@@ -150,7 +154,7 @@ class StatusBarChart(ctk.CTkFrame):
             labels,
             values,
             color=colors,
-            height=0.58,
+            height=0.48,
         )
 
         maximum_value = max(values, default=0)
@@ -161,7 +165,7 @@ class StatusBarChart(ctk.CTkFrame):
         self.axes.set_xlabel("Anzahl der Prüfungen")
         self.axes.grid(
             axis="x",
-            alpha=0.18,
+            alpha=0.10,
             linewidth=0.8,
         )
         self.axes.set_axisbelow(True)
@@ -242,20 +246,20 @@ class StatusBarChart(ctk.CTkFrame):
     @staticmethod
     def _background_color() -> str:
         if ctk.get_appearance_mode() == "Dark":
-            return "#242424"
+            return "#292A50"
 
-        return "#F7F7F7"
+        return "#FFFFFF"
 
     @staticmethod
     def _text_color() -> str:
         if ctk.get_appearance_mode() == "Dark":
-            return "#F3F4F6"
+            return "#F7F7FF"
 
         return "#1F2937"
 
     @staticmethod
     def _secondary_text_color() -> str:
         if ctk.get_appearance_mode() == "Dark":
-            return "#9CA3AF"
+            return "#A8A9C2"
 
         return "#6B7280"

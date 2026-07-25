@@ -20,7 +20,7 @@ from src.gui.components.dashboard_extra_charts import (
 )
 from src.gui.result_card import ResultCard
 from src.gui.hardware_page import HardwarePage
-from src.gui.theme import Colors
+from src.gui.theme import Colors, STATUS_COLORS
 from src.report.markdown_report import save_markdown_report
 from src.services.scan_history_service import ScanHistoryService
 
@@ -96,15 +96,15 @@ class DiagnosticApp(ctk.CTk):
     def __init__(self) -> None:
         super().__init__()
 
-        ctk.set_appearance_mode("system")
+        ctk.set_appearance_mode("dark")
         ctk.set_default_color_theme("blue")
 
         self.title("IT Support Diagnostic Toolkit")
-        self.geometry("1320x850")
-        self.minsize(1080, 720)
+        self.geometry("1400x900")
+        self.minsize(1160, 760)
 
         self.configure(
-            fg_color=("#F3F6FA", "#111827"),
+            fg_color=Colors.BACKGROUND,
         )
 
         self.diagnostic_results: list[tuple[str, dict]] = []
@@ -124,7 +124,7 @@ class DiagnosticApp(ctk.CTk):
         self._load_history_overview()
 
     def _create_layout(self) -> None:
-        self.grid_columnconfigure(0, minsize=230)
+        self.grid_columnconfigure(0, minsize=248)
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
@@ -140,117 +140,127 @@ class DiagnosticApp(ctk.CTk):
     def _create_sidebar(self) -> None:
         self.sidebar = ctk.CTkFrame(
             self,
-            width=230,
+            width=248,
             corner_radius=0,
-            fg_color=("#0F172A", "#0B1220"),
+            fg_color=Colors.SIDEBAR,
         )
-        self.sidebar.grid(
-            row=0,
-            column=0,
-            sticky="nsew",
-        )
+        self.sidebar.grid(row=0, column=0, sticky="nsew")
         self.sidebar.grid_propagate(False)
         self.sidebar.grid_columnconfigure(0, weight=1)
-        self.sidebar.grid_rowconfigure(8, weight=1)
+        self.sidebar.grid_rowconfigure(7, weight=1)
 
-        self.sidebar.grid_rowconfigure(0, minsize=18)
-
-        nav_entries = (
-            ("dashboard", "Übersicht"),
-            ("results", "Ergebnisse"),
-            ("hardware", "Hardware & Updates"),
-            ("history", "Verlauf & Vergleich"),
-            ("reports", "Berichte"),
-        )
-
-        for row, (page_key, label) in enumerate(
-            nav_entries,
-            start=1,
-        ):
-            button = ctk.CTkButton(
-                self.sidebar,
-                text=label,
-                height=44,
-                anchor="w",
-                corner_radius=8,
-                fg_color="transparent",
-                hover_color=("#1E293B", "#1E293B"),
-                text_color="#E2E8F0",
-                font=ctk.CTkFont(
-                    size=14,
-                    weight="bold",
-                ),
-                command=lambda selected=page_key: (
-                    self._show_page(selected)
-                ),
-            )
-            button.grid(
-                row=row,
-                column=0,
-                padx=14,
-                pady=4,
-                sticky="ew",
-            )
-            self.navigation_buttons[page_key] = button
-
-        separator = ctk.CTkFrame(
+        brand = ctk.CTkFrame(
             self.sidebar,
-            height=1,
-            fg_color="#334155",
+            height=88,
+            corner_radius=16,
+            border_width=1,
+            border_color=("#34375F", "#34375F"),
+            fg_color=Colors.SIDEBAR_RAISED,
         )
-        separator.grid(
-            row=6,
-            column=0,
-            padx=18,
-            pady=(22, 18),
-            sticky="ew",
+        brand.grid(row=0, column=0, padx=14, pady=(16, 18), sticky="ew")
+        brand.grid_propagate(False)
+        brand.grid_columnconfigure(1, weight=1)
+
+        badge = ctk.CTkFrame(
+            brand,
+            width=46,
+            height=46,
+            corner_radius=14,
+            fg_color=Colors.PRIMARY,
         )
+        badge.grid(row=0, column=0, rowspan=2, padx=(14, 11), pady=20)
+        badge.grid_propagate(False)
+        ctk.CTkLabel(
+            badge,
+            text="IT",
+            text_color="#FFFFFF",
+            font=ctk.CTkFont(size=15, weight="bold"),
+        ).place(relx=0.5, rely=0.5, anchor="center")
+        ctk.CTkFrame(
+            badge,
+            width=10,
+            height=10,
+            corner_radius=5,
+            fg_color=Colors.MINT,
+        ).place(relx=0.82, rely=0.18, anchor="center")
+
+        ctk.CTkLabel(
+            brand,
+            text="Diagnostic Toolkit",
+            anchor="w",
+            text_color="#F7F7FF",
+            font=ctk.CTkFont(size=14, weight="bold"),
+        ).grid(row=0, column=1, padx=(0, 12), pady=(20, 0), sticky="sw")
+        ctk.CTkLabel(
+            brand,
+            text="LOCAL WINDOWS SUPPORT",
+            anchor="w",
+            text_color="#8F92B3",
+            font=ctk.CTkFont(size=9, weight="bold"),
+        ).grid(row=1, column=1, padx=(0, 12), pady=(1, 20), sticky="nw")
 
         ctk.CTkLabel(
             self.sidebar,
-            text="Darstellung",
+            text="ARBEITSBEREICHE",
             anchor="w",
-            text_color="#94A3B8",
-            font=ctk.CTkFont(size=12),
-        ).grid(
-            row=7,
-            column=0,
-            padx=20,
-            pady=(0, 7),
-            sticky="ew",
+            text_color="#777A9B",
+            font=ctk.CTkFont(size=10, weight="bold"),
+        ).grid(row=1, column=0, padx=22, pady=(0, 7), sticky="ew")
+
+        nav_entries = (
+            ("dashboard", "◈  Übersicht"),
+            ("results", "✓  Ergebnisse"),
+            ("hardware", "▦  Hardware & Updates"),
+            ("history", "↔  Verlauf & Vergleich"),
+            ("reports", "▤  Berichte"),
         )
+        for row, (page_key, label) in enumerate(nav_entries, start=2):
+            button = ctk.CTkButton(
+                self.sidebar,
+                text=label,
+                height=45,
+                anchor="w",
+                corner_radius=12,
+                border_width=0,
+                fg_color="transparent",
+                hover_color=Colors.NAV_HOVER,
+                text_color="#D9DAEC",
+                font=ctk.CTkFont(size=13, weight="bold"),
+                command=lambda selected=page_key: self._show_page(selected),
+            )
+            button.grid(row=row, column=0, padx=14, pady=4, sticky="ew")
+            self.navigation_buttons[page_key] = button
+
+        ctk.CTkLabel(
+            self.sidebar,
+            text="DARSTELLUNG",
+            anchor="w",
+            text_color="#777A9B",
+            font=ctk.CTkFont(size=10, weight="bold"),
+        ).grid(row=8, column=0, padx=22, pady=(12, 7), sticky="ew")
 
         self.appearance_menu = ctk.CTkOptionMenu(
             self.sidebar,
             values=["System", "Hell", "Dunkel"],
             command=self._change_appearance,
-            fg_color="#1E293B",
-            button_color="#334155",
-            button_hover_color="#475569",
+            height=36,
+            corner_radius=10,
+            fg_color=Colors.SIDEBAR_RAISED,
+            button_color=Colors.PRIMARY,
+            button_hover_color=Colors.PRIMARY_HOVER,
+            text_color="#F7F7FF",
         )
-        self.appearance_menu.grid(
-            row=8,
-            column=0,
-            padx=16,
-            sticky="new",
-        )
-        self.appearance_menu.set("System")
+        self.appearance_menu.grid(row=9, column=0, padx=14, sticky="ew")
+        self.appearance_menu.set("Dunkel")
 
-        footer = ctk.CTkLabel(
+        ctk.CTkLabel(
             self.sidebar,
-            text="Windows-Diagnose\nLokale Ausführung",
+            text="●  Lokale Ausführung\n    Keine Cloud-Übertragung",
             justify="left",
             anchor="w",
-            text_color="#64748B",
-            font=ctk.CTkFont(size=11),
-        )
-        footer.grid(
-            row=9,
-            column=0,
-            padx=20,
-            pady=20,
-            sticky="sw",
-        )
+            text_color="#777A9B",
+            font=ctk.CTkFont(size=10),
+        ).grid(row=10, column=0, padx=20, pady=18, sticky="sw")
 
     def _create_page_container(self) -> None:
         self.page_container = ctk.CTkFrame(
@@ -274,8 +284,8 @@ class DiagnosticApp(ctk.CTk):
         page.grid(
             row=0,
             column=0,
-            padx=24,
-            pady=20,
+            padx=28,
+            pady=24,
             sticky="nsew",
         )
         page.grid_columnconfigure(0, weight=1)
@@ -293,17 +303,8 @@ class DiagnosticApp(ctk.CTk):
         action_command=None,
     ) -> ctk.CTkFrame:
         title, subtitle = PAGE_TITLES[page_key]
-
-        header = ctk.CTkFrame(
-            master,
-            fg_color="transparent",
-        )
-        header.grid(
-            row=0,
-            column=0,
-            pady=(0, 16),
-            sticky="ew",
-        )
+        header = ctk.CTkFrame(master, fg_color="transparent")
+        header.grid(row=0, column=0, pady=(0, 18), sticky="ew")
         header.grid_columnconfigure(0, weight=1)
 
         ctk.CTkLabel(
@@ -311,48 +312,35 @@ class DiagnosticApp(ctk.CTk):
             text=title,
             anchor="w",
             text_color=Colors.TEXT,
-            font=ctk.CTkFont(
-                size=27,
-                weight="bold",
-            ),
-        ).grid(
-            row=0,
-            column=0,
-            sticky="w",
-        )
-
+            font=ctk.CTkFont(size=29, weight="bold"),
+        ).grid(row=0, column=0, sticky="w")
         ctk.CTkLabel(
             header,
             text=subtitle,
             anchor="w",
             text_color=Colors.MUTED,
             font=ctk.CTkFont(size=13),
-        ).grid(
-            row=1,
-            column=0,
-            pady=(3, 0),
-            sticky="w",
-        )
+        ).grid(row=1, column=0, pady=(4, 0), sticky="w")
 
         if action_text and action_command:
             ctk.CTkButton(
                 header,
                 text=action_text,
-                height=38,
-                width=170,
-                font=ctk.CTkFont(
-                    size=13,
-                    weight="bold",
-                ),
+                height=40,
+                width=176,
+                corner_radius=11,
+                fg_color=Colors.PRIMARY,
+                hover_color=Colors.PRIMARY_HOVER,
+                text_color="#FFFFFF",
+                font=ctk.CTkFont(size=13, weight="bold"),
                 command=action_command,
             ).grid(
                 row=0,
                 column=1,
                 rowspan=2,
-                padx=(16, 0),
+                padx=(18, 0),
                 sticky="e",
             )
-
         return header
 
     def _create_dashboard_page(self) -> None:
@@ -379,36 +367,53 @@ class DiagnosticApp(ctk.CTk):
     def _create_scan_panel(self, master) -> None:
         panel = ctk.CTkFrame(
             master,
-            corner_radius=14,
+            corner_radius=18,
             border_width=1,
             border_color=Colors.BORDER,
-            fg_color=Colors.SURFACE,
+            fg_color=Colors.SURFACE_RAISED,
         )
-        panel.grid(
+        panel.grid(row=0, column=0, pady=(0, 14), sticky="ew")
+        panel.grid_columnconfigure(0, weight=1)
+
+        gradient_bar = ctk.CTkFrame(
+            panel,
+            height=6,
+            corner_radius=5,
+            fg_color="transparent",
+        )
+        gradient_bar.grid(
             row=0,
             column=0,
-            pady=(0, 14),
+            columnspan=2,
+            padx=16,
+            pady=(12, 4),
             sticky="ew",
         )
-        panel.grid_columnconfigure(0, weight=1)
+        gradient_bar.grid_columnconfigure((0, 1, 2), weight=1)
+        for column, color in enumerate((Colors.PRIMARY, Colors.CYAN, Colors.MINT)):
+            ctk.CTkFrame(
+                gradient_bar,
+                height=6,
+                corner_radius=4,
+                fg_color=color,
+            ).grid(row=0, column=column, sticky="ew")
+
+        ctk.CTkLabel(
+            panel,
+            text="SYSTEMSTATUS",
+            anchor="w",
+            text_color=Colors.CYAN,
+            font=ctk.CTkFont(size=10, weight="bold"),
+        ).grid(row=1, column=0, padx=20, pady=(7, 1), sticky="w")
 
         self.status_label = ctk.CTkLabel(
             panel,
             text="System wurde noch nicht geprüft.",
             anchor="w",
             text_color=Colors.TEXT,
-            font=ctk.CTkFont(
-                size=18,
-                weight="bold",
-            ),
+            font=ctk.CTkFont(size=19, weight="bold"),
         )
-        self.status_label.grid(
-            row=0,
-            column=0,
-            padx=20,
-            pady=(18, 2),
-            sticky="w",
-        )
+        self.status_label.grid(row=2, column=0, padx=20, pady=(0, 2), sticky="w")
 
         self.result_label = ctk.CTkLabel(
             panel,
@@ -420,131 +425,114 @@ class DiagnosticApp(ctk.CTk):
             text_color=Colors.MUTED,
             font=ctk.CTkFont(size=13),
         )
-        self.result_label.grid(
-            row=1,
-            column=0,
-            padx=20,
-            pady=(0, 12),
-            sticky="w",
-        )
+        self.result_label.grid(row=3, column=0, padx=20, pady=(0, 12), sticky="w")
 
         self.progress_bar = ctk.CTkProgressBar(
             panel,
-            height=8,
+            height=7,
+            corner_radius=5,
+            fg_color=Colors.SURFACE_SOFT,
+            progress_color=Colors.CYAN,
         )
-        self.progress_bar.grid(
-            row=2,
-            column=0,
-            padx=20,
-            pady=(0, 18),
-            sticky="ew",
-        )
+        self.progress_bar.grid(row=4, column=0, padx=20, pady=(0, 18), sticky="ew")
         self.progress_bar.set(0)
 
-        self.scan_button = ctk.CTkButton(
-            panel,
-            text="Diagnose starten",
-            width=180,
-            height=42,
-            font=ctk.CTkFont(
-                size=14,
-                weight="bold",
-            ),
-            command=self._start_scan,
-        )
-        self.scan_button.grid(
-            row=0,
+        action_area = ctk.CTkFrame(panel, width=200, fg_color="transparent")
+        action_area.grid(
+            row=1,
             column=1,
-            rowspan=3,
+            rowspan=4,
             padx=20,
-            pady=18,
+            pady=14,
             sticky="e",
         )
+        self.scan_state_badge = ctk.CTkLabel(
+            action_area,
+            text="BEREIT",
+            height=25,
+            corner_radius=8,
+            fg_color=Colors.SURFACE_SOFT,
+            text_color=Colors.MUTED,
+            font=ctk.CTkFont(size=10, weight="bold"),
+        )
+        self.scan_state_badge.grid(row=0, column=0, pady=(0, 9), sticky="e")
+
+        self.scan_button = ctk.CTkButton(
+            action_area,
+            text="Diagnose starten",
+            width=188,
+            height=43,
+            corner_radius=12,
+            fg_color=Colors.PRIMARY,
+            hover_color=Colors.CYAN,
+            text_color="#FFFFFF",
+            font=ctk.CTkFont(size=14, weight="bold"),
+            command=self._start_scan,
+        )
+        self.scan_button.grid(row=1, column=0)
 
     def _create_summary_cards(self, master) -> None:
-        self.summary_frame = ctk.CTkFrame(
-            master,
-            fg_color="transparent",
-        )
-        self.summary_frame.grid(
-            row=1,
-            column=0,
-            pady=(0, 14),
-            sticky="ew",
-        )
+        self.summary_frame = ctk.CTkFrame(master, fg_color="transparent")
+        self.summary_frame.grid(row=1, column=0, pady=(0, 14), sticky="ew")
 
-        statuses = list(SUMMARY_STYLES)
-
-        for column_index, status in enumerate(statuses):
+        metrics = (
+            ("TOTAL", "Prüfungen", Colors.PRIMARY),
+            ("PROBLEME", "Probleme", Colors.CYAN),
+            ("KRITISCH", "Kritisch", STATUS_COLORS["KRITISCH"]),
+            ("FEHLER", "Fehler", STATUS_COLORS["FEHLER"]),
+        )
+        for column_index, (metric, label, accent) in enumerate(metrics):
             self.summary_frame.grid_columnconfigure(
                 column_index,
                 weight=1,
-                uniform="status",
+                uniform="dashboard_metrics",
             )
-
-            style = SUMMARY_STYLES[status]
-
             card = ctk.CTkFrame(
                 self.summary_frame,
-                height=88,
-                corner_radius=12,
+                height=104,
+                corner_radius=16,
                 border_width=1,
                 border_color=Colors.BORDER,
-                fg_color=Colors.SURFACE,
+                fg_color=Colors.SURFACE_RAISED,
             )
             card.grid(
                 row=0,
                 column=column_index,
-                padx=(0 if column_index == 0 else 5, 5),
+                padx=(
+                    (0, 6)
+                    if column_index == 0
+                    else (6, 6)
+                    if column_index < len(metrics) - 1
+                    else (6, 0)
+                ),
                 sticky="ew",
             )
             card.grid_propagate(False)
             card.grid_columnconfigure(0, weight=1)
-
             ctk.CTkFrame(
                 card,
-                height=5,
+                height=4,
                 corner_radius=4,
-                fg_color=style["color"],
-            ).grid(
-                row=0,
-                column=0,
-                padx=10,
-                pady=(8, 2),
-                sticky="ew",
-            )
-
+                fg_color=accent,
+            ).grid(row=0, column=0, padx=14, pady=(12, 5), sticky="ew")
+            ctk.CTkLabel(
+                card,
+                text=label.upper(),
+                anchor="w",
+                text_color=Colors.MUTED,
+                font=ctk.CTkFont(size=9, weight="bold"),
+            ).grid(row=1, column=0, padx=15, sticky="w")
             value_label = ctk.CTkLabel(
                 card,
                 text="0",
+                anchor="w",
                 text_color=Colors.TEXT,
-                font=ctk.CTkFont(
-                    size=22,
-                    weight="bold",
-                ),
+                font=ctk.CTkFont(size=27, weight="bold"),
             )
-            value_label.grid(
-                row=1,
-                column=0,
-                pady=(0, 0),
-            )
-
-            ctk.CTkLabel(
-                card,
-                text=style["label"],
-                text_color=Colors.MUTED,
-                font=ctk.CTkFont(size=12),
-            ).grid(
-                row=2,
-                column=0,
-                pady=(0, 8),
-            )
-
-            self.summary_value_labels[status] = value_label
-            self.summary_cards[status] = card
-            self._bind_status_card(card, status)
-
-
+            value_label.grid(row=2, column=0, padx=15, pady=(0, 8), sticky="w")
+            self.summary_value_labels[metric] = value_label
+            self.summary_cards[metric] = card
+            self._bind_status_card(card, metric)
 
     def _create_action_center(self, master) -> None:
         """Erstellt einen kompakten Bereich für aktuelle Probleme."""
@@ -552,10 +540,10 @@ class DiagnosticApp(ctk.CTk):
         self.action_center_frame = ctk.CTkFrame(
             master,
             height=164,
-            corner_radius=14,
+            corner_radius=18,
             border_width=1,
             border_color=Colors.BORDER,
-            fg_color=Colors.SURFACE,
+            fg_color=Colors.SURFACE_RAISED,
         )
         self.action_center_frame.grid(
             row=2,
@@ -658,7 +646,7 @@ class DiagnosticApp(ctk.CTk):
             corner_radius=10,
             border_width=1,
             border_color=Colors.BORDER,
-            fg_color=("gray96", "gray17"),
+            fg_color=Colors.SURFACE_SOFT,
         )
         placeholder.grid(
             row=0,
@@ -790,7 +778,7 @@ class DiagnosticApp(ctk.CTk):
             corner_radius=10,
             border_width=1,
             border_color=Colors.BORDER,
-            fg_color=("gray96", "gray17"),
+            fg_color=Colors.SURFACE_SOFT,
         )
         item.grid(
             row=0,
@@ -1051,10 +1039,10 @@ class DiagnosticApp(ctk.CTk):
 
         filter_bar = ctk.CTkFrame(
             body,
-            corner_radius=12,
+            corner_radius=16,
             border_width=1,
             border_color=Colors.BORDER,
-            fg_color=Colors.SURFACE,
+            fg_color=Colors.SURFACE_RAISED,
         )
         filter_bar.grid(
             row=0,
@@ -1105,7 +1093,7 @@ class DiagnosticApp(ctk.CTk):
             border_width=1,
             border_color=Colors.BORDER,
             text_color=Colors.TEXT,
-            hover_color=("#FEE2E2", "#450A0A"),
+            hover_color=Colors.DANGER_SOFT,
             command=lambda: self._set_status_filter("PROBLEME"),
         )
         problem_button.grid(
@@ -1130,7 +1118,7 @@ class DiagnosticApp(ctk.CTk):
                 border_width=1,
                 border_color=Colors.BORDER,
                 text_color=Colors.TEXT,
-                hover_color=("#E2E8F0", "#334155"),
+                hover_color=Colors.NAV_HOVER,
                 command=lambda selected=status: (
                     self._set_status_filter(selected)
                 ),
@@ -1159,10 +1147,10 @@ class DiagnosticApp(ctk.CTk):
 
         self.results_frame = ctk.CTkScrollableFrame(
             body,
-            corner_radius=12,
+            corner_radius=16,
             border_width=1,
             border_color=Colors.BORDER,
-            fg_color=Colors.SURFACE,
+            fg_color=Colors.SURFACE_RAISED,
         )
         self.results_frame.grid(
             row=2,
@@ -1216,10 +1204,10 @@ class DiagnosticApp(ctk.CTk):
 
         info = ctk.CTkFrame(
             body,
-            corner_radius=12,
+            corner_radius=16,
             border_width=1,
             border_color=Colors.BORDER,
-            fg_color=Colors.SURFACE,
+            fg_color=Colors.SURFACE_RAISED,
         )
         info.grid(
             row=1,
@@ -1318,10 +1306,10 @@ class DiagnosticApp(ctk.CTk):
 
         report_card = ctk.CTkFrame(
             body,
-            corner_radius=14,
+            corner_radius=18,
             border_width=1,
             border_color=Colors.BORDER,
-            fg_color=Colors.SURFACE,
+            fg_color=Colors.SURFACE_RAISED,
         )
         report_card.grid(
             row=0,
@@ -1421,10 +1409,10 @@ class DiagnosticApp(ctk.CTk):
 
         hint_card = ctk.CTkFrame(
             body,
-            corner_radius=12,
+            corner_radius=16,
             border_width=1,
             border_color=Colors.BORDER,
-            fg_color=Colors.SURFACE,
+            fg_color=Colors.SURFACE_RAISED,
         )
         hint_card.grid(
             row=1,
@@ -1471,27 +1459,21 @@ class DiagnosticApp(ctk.CTk):
     def _show_page(self, page_key: str) -> None:
         if page_key not in self.pages:
             return
-
         for page in self.pages.values():
             page.grid_remove()
-
         self.pages[page_key].grid()
         self.active_page = page_key
 
         for key, button in self.navigation_buttons.items():
             is_active = key == page_key
             button.configure(
-                fg_color=(
-                    "#2563EB"
-                    if is_active
-                    else "transparent"
-                ),
+                fg_color=Colors.PRIMARY if is_active else "transparent",
                 hover_color=(
-                    "#1D4ED8"
-                    if is_active
-                    else "#1E293B"
+                    Colors.PRIMARY_HOVER if is_active else Colors.NAV_HOVER
                 ),
-                text_color="#FFFFFF" if is_active else "#E2E8F0",
+                text_color="#FFFFFF" if is_active else "#D9DAEC",
+                border_width=1 if is_active else 0,
+                border_color=Colors.CYAN,
             )
 
     def _change_appearance(self, value: str) -> None:
@@ -1549,6 +1531,11 @@ class DiagnosticApp(ctk.CTk):
         self.scan_button.configure(
             state="disabled",
             text="Diagnose läuft ...",
+        )
+        self.scan_state_badge.configure(
+            text="PRÜFUNG LÄUFT",
+            fg_color=Colors.SURFACE_SOFT,
+            text_color=Colors.CYAN,
         )
         self.status_label.configure(
             text="Systemdiagnose wird ausgeführt."
@@ -1626,6 +1613,29 @@ class DiagnosticApp(ctk.CTk):
             + status_counts["KRITISCH"]
         )
         error_count = status_counts["FEHLER"]
+
+        if error_count > 0:
+            badge_text = "FEHLER"
+            badge_background = Colors.DANGER_SOFT
+            badge_color = Colors.DANGER
+        elif status_counts["KRITISCH"] > 0:
+            badge_text = "KRITISCH"
+            badge_background = Colors.DANGER_SOFT
+            badge_color = Colors.DANGER
+        elif status_counts["WARNUNG"] > 0:
+            badge_text = "HANDLUNGSBEDARF"
+            badge_background = Colors.WARNING_SOFT
+            badge_color = Colors.WARNING
+        else:
+            badge_text = "SYSTEM OK"
+            badge_background = Colors.SUCCESS_SOFT
+            badge_color = Colors.SUCCESS
+
+        self.scan_state_badge.configure(
+            text=badge_text,
+            fg_color=badge_background,
+            text_color=badge_color,
+        )
 
         self.status_label.configure(
             text="Systemdiagnose abgeschlossen."
@@ -1803,15 +1813,18 @@ class DiagnosticApp(ctk.CTk):
         self,
         status_counts: Counter,
     ) -> None:
-        for status, value_label in (
-            self.summary_value_labels.items()
-        ):
-            value_label.configure(
-                text=str(
-                    status_counts.get(status, 0)
-                )
-            )
-
+        metric_values = {
+            "TOTAL": sum(status_counts.values()),
+            "PROBLEME": (
+                status_counts.get("WARNUNG", 0)
+                + status_counts.get("KRITISCH", 0)
+                + status_counts.get("FEHLER", 0)
+            ),
+            "KRITISCH": status_counts.get("KRITISCH", 0),
+            "FEHLER": status_counts.get("FEHLER", 0),
+        }
+        for metric, value_label in self.summary_value_labels.items():
+            value_label.configure(text=str(metric_values.get(metric, 0)))
         self.status_chart.update_data(status_counts)
 
     def _reset_summary_dashboard(self) -> None:
@@ -1853,12 +1866,17 @@ class DiagnosticApp(ctk.CTk):
     ) -> None:
         if not self.diagnostic_results:
             return
+        if status == "TOTAL":
+            target_filter = None
+        elif status == "PROBLEME":
+            target_filter = "PROBLEME"
+        else:
+            target_filter = status
 
-        if self.active_status_filter == status:
+        if target_filter is not None and self.active_status_filter == target_filter:
             self.active_status_filter = None
         else:
-            self.active_status_filter = status
-
+            self.active_status_filter = target_filter
         self._apply_result_filter()
         self._show_page("results")
 
@@ -1895,27 +1913,21 @@ class DiagnosticApp(ctk.CTk):
         self._display_results(filtered_results)
 
     def _update_filter_buttons(self) -> None:
-        active_key = (
-            self.active_status_filter
-            if self.active_status_filter
-            else "ALL"
-        )
-
-        for key, button in (
-            self.result_filter_buttons.items()
-        ):
+        active_key = self.active_status_filter if self.active_status_filter else "ALL"
+        for key, button in self.result_filter_buttons.items():
             active = key == active_key
             if key == "ALL":
-                accent = "#2563EB"
+                accent = Colors.PRIMARY
             elif key == "PROBLEME":
-                accent = ("#B91C1C", "#EF4444")
+                accent = Colors.DANGER
             else:
                 accent = SUMMARY_STYLES[key]["color"]
-
             button.configure(
                 fg_color=accent if active else "transparent",
+                hover_color=accent if active else Colors.NAV_HOVER,
                 text_color="#FFFFFF" if active else Colors.TEXT,
                 border_width=0 if active else 1,
+                border_color=Colors.BORDER,
             )
 
     def _display_results(
@@ -2029,17 +2041,14 @@ class DiagnosticApp(ctk.CTk):
         )
 
     def _scan_failed(self, error_message: str) -> None:
-        self.status_label.configure(
-            text="Die Systemdiagnose wurde abgebrochen."
+        self.status_label.configure(text="Die Systemdiagnose wurde abgebrochen.")
+        self.result_label.configure(text=f"Fehler: {error_message}")
+        self.scan_state_badge.configure(
+            text="FEHLER",
+            fg_color=Colors.DANGER_SOFT,
+            text_color=Colors.DANGER,
         )
-        self.result_label.configure(
-            text=f"Fehler: {error_message}"
-        )
-        self.scan_button.configure(
-            state="normal",
-            text="Erneut versuchen",
-        )
-
+        self.scan_button.configure(state="normal", text="Erneut versuchen")
 
 def run_app() -> None:
     app = DiagnosticApp()

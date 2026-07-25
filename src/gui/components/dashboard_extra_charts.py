@@ -38,10 +38,10 @@ class BaseChart(ctk.CTkFrame):
     ) -> None:
         super().__init__(
             master,
-            corner_radius=12,
+            corner_radius=16,
             border_width=1,
             border_color=Colors.BORDER,
-            fg_color=Colors.SURFACE,
+            fg_color=Colors.SURFACE_RAISED,
         )
         self.grid_columnconfigure(0, weight=1)
 
@@ -91,8 +91,8 @@ class BaseChart(ctk.CTkFrame):
 
     def apply_theme(self) -> None:
         dark = ctk.get_appearance_mode() == "Dark"
-        background = "#1F2937" if dark else "#FFFFFF"
-        foreground = "#F8FAFC" if dark else "#111827"
+        background = "#292A50" if dark else "#FFFFFF"
+        foreground = "#F7F7FF" if dark else "#171833"
 
         self.figure.patch.set_facecolor(background)
         self.axes.set_facecolor(background)
@@ -122,7 +122,7 @@ class BaseChart(ctk.CTkFrame):
             va="center",
             transform=self.axes.transAxes,
             color=(
-                "#94A3B8"
+                "#A8A9C2"
                 if ctk.get_appearance_mode() == "Dark"
                 else "#64748B"
             ),
@@ -296,7 +296,7 @@ class HistoryChart(BaseChart):
             label="Probleme gesamt",
         )
         self.axes.set_ylabel("Anzahl")
-        self.axes.grid(axis="y", alpha=0.16)
+        self.axes.grid(axis="y", alpha=0.10)
         self.axes.tick_params(axis="x", rotation=25)
         self.axes.legend(
             loc="upper center",

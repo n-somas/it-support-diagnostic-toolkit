@@ -23,3 +23,5 @@ backup_before_*/
 upgrade_*.py
 
 upgrade_*.pyz
+.ui_redesign_backup/
+upgrade_modern_neon_ui.py

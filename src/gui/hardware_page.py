@@ -59,10 +59,10 @@ class HardwarePage(ctk.CTkFrame):
         self.system_header = ctk.CTkFrame(
             self,
             height=92,
-            corner_radius=14,
+            corner_radius=18,
             border_width=1,
             border_color=Colors.BORDER,
-            fg_color=Colors.SURFACE,
+            fg_color=Colors.SURFACE_RAISED,
         )
         self.system_header.grid(
             row=0,
@@ -153,7 +153,7 @@ class HardwarePage(ctk.CTkFrame):
             text=text,
             height=30,
             corner_radius=8,
-            fg_color=("gray88", "gray25"),
+            fg_color=Colors.SURFACE_SOFT,
             text_color=Colors.MUTED,
             font=ctk.CTkFont(size=11, weight="bold"),
         )
@@ -187,10 +187,10 @@ class HardwarePage(ctk.CTkFrame):
             card = ctk.CTkFrame(
                 frame,
                 height=108,
-                corner_radius=12,
+                corner_radius=16,
                 border_width=1,
                 border_color=Colors.BORDER,
-                fg_color=Colors.SURFACE,
+                fg_color=Colors.SURFACE_RAISED,
             )
             card.grid(
                 row=0,
@@ -260,13 +260,13 @@ class HardwarePage(ctk.CTkFrame):
     def _create_detail_tabs(self) -> None:
         self.tabview = ctk.CTkTabview(
             self,
-            corner_radius=12,
+            corner_radius=16,
             border_width=1,
             border_color=Colors.BORDER,
-            fg_color=Colors.SURFACE,
-            segmented_button_fg_color=("gray88", "gray23"),
-            segmented_button_selected_color=("#2563EB", "#2563EB"),
-            segmented_button_selected_hover_color=("#1D4ED8", "#1D4ED8"),
+            fg_color=Colors.SURFACE_RAISED,
+            segmented_button_fg_color=Colors.SURFACE_SOFT,
+            segmented_button_selected_color=Colors.PRIMARY,
+            segmented_button_selected_hover_color=Colors.PRIMARY_HOVER,
         )
         self.tabview.grid(
             row=2,
@@ -356,10 +356,10 @@ class HardwarePage(ctk.CTkFrame):
     ) -> None:
         panel = ctk.CTkFrame(
             master,
-            corner_radius=10,
+            corner_radius=14,
             border_width=1,
             border_color=Colors.BORDER,
-            fg_color=("gray96", "gray17"),
+            fg_color=Colors.SURFACE_SOFT,
         )
         panel.grid(
             row=row,
@@ -425,10 +425,10 @@ class HardwarePage(ctk.CTkFrame):
         # Direkte Verknüpfungen zu Windows Update.
         frame = ctk.CTkFrame(
             self,
-            corner_radius=12,
+            corner_radius=16,
             border_width=1,
             border_color=Colors.BORDER,
-            fg_color=Colors.SURFACE,
+            fg_color=Colors.SURFACE_RAISED,
         )
         frame.grid(
             row=3,
@@ -767,7 +767,7 @@ class HardwarePage(ctk.CTkFrame):
         if muted:
             badge.configure(
                 text=text,
-                fg_color=("gray88", "gray25"),
+                fg_color=Colors.SURFACE_SOFT,
                 text_color=Colors.MUTED,
             )
             return
