@@ -23,6 +23,7 @@ Das Projekt wurde als praxisnahes Portfolio-Projekt für IT-Support, Systemadmin
 - moderne Windows-Oberfläche mit fester Seitenleiste
 - automatisierte Prüfung von System-, Netzwerk- und Sicherheitsbereichen
 - Prüfung ausgewählter Windows-Dienste mit kontextbezogener Bewertung
+- datenschutzfreundliche Auswertung kritischer und fehlerhafter Windows-Ereignisse
 - Hardwareinventarisierung für CPU, RAM, GPU, Mainboard, BIOS, Laufwerke und Netzwerkadapter
 - Prüfung auf Geräte mit auffälligem Status
 - Erkennung verfügbarer Windows- und Treiberupdates
@@ -67,7 +68,20 @@ Gespeicherte Diagnoseläufe werden als zeitlicher Verlauf dargestellt. Die Statu
 
 ![Verlauf gespeicherter Diagnoseläufe](docs/images/history.png)
 
-### Diagnosevergleich
+### Windows-Ereignisauswertung
+
+Die Anwendung analysiert kritische und fehlerhafte Ereignisse aus den
+Windows-Protokollen `System` und `Application` innerhalb der letzten
+24 Stunden. Wiederholte Ereignisse werden nach Quelle und Ereignis-ID
+gruppiert. Unerwartete Neustarts, Bugchecks, Datenträger- und
+Hardwarefehler, Anwendungsabstürze sowie Dienstfehler werden gesondert
+bewertet.
+
+Aus Datenschutzgründen übernimmt die Anwendung keine vollständigen
+Ereignismeldungen. Gespeichert werden nur Protokoll, Quelle,
+Ereignis-ID, Ebene, Zeitpunkt und Häufigkeit.
+
+## Diagnosevergleich
 
 Zwei gespeicherte Diagnoseläufe können innerhalb der Hauptanwendung verglichen werden. Statusänderungen und veränderte Detailwerte werden getrennt dargestellt.
 
@@ -88,6 +102,7 @@ Berichte können als Markdown-Dateien erstellt und exportiert werden. Auf einen 
 | Defenderprüfung | Echtzeitschutz, Antivirus-Status, Signaturinformationen und Schutzstatus |
 | Windows Update | Verfügbare Windows- und Treiberupdates, letztes installiertes Update und Neustartbedarf |
 | Windows-Dienste | Status und Starttyp ausgewählter Support-, Netzwerk- und Wartungsdienste |
+| Windows-Ereignisse | Kritische und fehlerhafte Ereignisse aus System und Application mit Gruppierung, Bewertung und Handlungsempfehlungen |
 | Offene Ports | Lokale TCP-Listening-Ports, zugehörige Prozesse und auffällige Standardports |
 | BitLocker | Verschlüsselungsstatus, Schutzstatus und Verschlüsselungsgrad von Laufwerk C: |
 | Scan-Historie | Lokale Speicherung vergangener Diagnosen |
@@ -250,7 +265,6 @@ Das Tool überträgt keine Diagnosedaten automatisch an externe Dienste.
 
 ## Roadmap
 
-- Auswertung relevanter Windows-Ereignisse
 - Analyse von Autostartprogrammen
 - Verlauf der Speicherbelegung
 - HTML- und PDF-Berichte

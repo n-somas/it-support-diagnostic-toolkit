@@ -12,6 +12,7 @@ from src.checks.open_ports_check import get_open_ports_info
 from src.checks.system_info import get_system_info
 from src.checks.windows_update_check import get_windows_update_info
 from src.checks.windows_services_check import get_windows_services_info
+from src.checks.windows_event_check import get_windows_event_info
 
 ProgressCallback = Callable[[str, int, int], None]
 
@@ -25,6 +26,7 @@ DIAGNOSTIC_CHECKS = [
     ("Defenderprüfung", get_defender_info),
     ("Windows Update Prüfung", get_windows_update_info),
     ("Windows-Dienste Prüfung", get_windows_services_info),
+    ("Windows-Ereignisse Prüfung", get_windows_event_info),
     ("Offene Ports Prüfung", get_open_ports_info),
     ("BitLocker Prüfung", get_bitlocker_info),
 ]
