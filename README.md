@@ -22,6 +22,7 @@ Das Projekt wurde als praxisnahes Portfolio-Projekt für IT-Support, Systemadmin
 
 - moderne Windows-Oberfläche mit fester Seitenleiste
 - automatisierte Prüfung von System-, Netzwerk- und Sicherheitsbereichen
+- Prüfung ausgewählter Windows-Dienste mit kontextbezogener Bewertung
 - Hardwareinventarisierung für CPU, RAM, GPU, Mainboard, BIOS, Laufwerke und Netzwerkadapter
 - Prüfung auf Geräte mit auffälligem Status
 - Erkennung verfügbarer Windows- und Treiberupdates
@@ -86,6 +87,7 @@ Berichte können als Markdown-Dateien erstellt und exportiert werden. Auf einen 
 | Firewallprüfung | Status der Windows-Firewall für Domänen-, private und öffentliche Profile |
 | Defenderprüfung | Echtzeitschutz, Antivirus-Status, Signaturinformationen und Schutzstatus |
 | Windows Update | Verfügbare Windows- und Treiberupdates, letztes installiertes Update und Neustartbedarf |
+| Windows-Dienste | Status und Starttyp ausgewählter Support-, Netzwerk- und Wartungsdienste |
 | Offene Ports | Lokale TCP-Listening-Ports, zugehörige Prozesse und auffällige Standardports |
 | BitLocker | Verschlüsselungsstatus, Schutzstatus und Verschlüsselungsgrad von Laufwerk C: |
 | Scan-Historie | Lokale Speicherung vergangener Diagnosen |
@@ -248,7 +250,6 @@ Das Tool überträgt keine Diagnosedaten automatisch an externe Dienste.
 
 ## Roadmap
 
-- Prüfung ausgewählter Windows-Dienste
 - Auswertung relevanter Windows-Ereignisse
 - Analyse von Autostartprogrammen
 - Verlauf der Speicherbelegung

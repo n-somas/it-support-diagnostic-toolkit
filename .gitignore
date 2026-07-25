@@ -25,3 +25,5 @@ upgrade_*.py
 upgrade_*.pyz
 .ui_redesign_backup/
 upgrade_modern_neon_ui.py
+.feature_backup/
+upgrade_windows_services_check.py
