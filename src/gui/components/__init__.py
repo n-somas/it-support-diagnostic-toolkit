@@ -1,1 +1,1 @@
-﻿"""Wiederverwendbare GUI-Komponenten."""
+"""Wiederverwendbare GUI-Komponenten."""

@@ -26,12 +26,12 @@ STATUS_LABELS = {
 }
 
 STATUS_COLORS = {
-    "OK": "#22C55E",
-    "INFO": "#3B82F6",
-    "HINWEIS": "#A855F7",
-    "WARNUNG": "#F59E0B",
-    "KRITISCH": "#EF4444",
-    "FEHLER": "#DC2626",
+    "OK": "#55B5A5",
+    "INFO": "#5B8DEF",
+    "HINWEIS": "#8292AE",
+    "WARNUNG": "#D5953F",
+    "KRITISCH": "#DD5A6E",
+    "FEHLER": "#C94359",
 }
 
 
@@ -246,20 +246,20 @@ class StatusBarChart(ctk.CTkFrame):
     @staticmethod
     def _background_color() -> str:
         if ctk.get_appearance_mode() == "Dark":
-            return "#292A50"
+            return "#192433"
 
         return "#FFFFFF"
 
     @staticmethod
     def _text_color() -> str:
         if ctk.get_appearance_mode() == "Dark":
-            return "#F7F7FF"
+            return "#F2F4F7"
 
-        return "#1F2937"
+        return "#192433"
 
     @staticmethod
     def _secondary_text_color() -> str:
         if ctk.get_appearance_mode() == "Dark":
-            return "#A8A9C2"
+            return "#A3AFBF"
 
         return "#6B7280"

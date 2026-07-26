@@ -1,39 +1,45 @@
-"""Zentrale Designwerte für die Desktopoberfläche."""
+"""Zentrale Designwerte für eine zeitlose Enterprise-Oberfläche."""
 
 
 class Colors:
-    """Helles und dunkles Farbsystem im technischen Neon-Dashboard-Stil."""
+    """Neutrales Farbsystem für professionelle Windows-Software."""
 
-    BACKGROUND = ("#F4F6FC", "#171833")
-    SIDEBAR = ("#171833", "#111226")
-    SIDEBAR_RAISED = ("#222342", "#1A1B38")
-    SIDEBAR_TEXT = ("#F7F7FF", "#F7F7FF")
+    BACKGROUND = ("#F5F7FA", "#101722")
+    SIDEBAR = ("#0C1320", "#0C1320")
+    SIDEBAR_RAISED = ("#121C2A", "#121C2A")
+    SIDEBAR_TEXT = ("#E7ECF3", "#E7ECF3")
 
-    SURFACE = ("#FFFFFF", "#222342")
-    SURFACE_RAISED = ("#FFFFFF", "#292A50")
-    SURFACE_SOFT = ("#EFF2FA", "#1D1E3C")
+    SURFACE = ("#FFFFFF", "#151E2B")
+    SURFACE_RAISED = ("#FFFFFF", "#192433")
+    SURFACE_SOFT = ("#F3F5F8", "#202C3C")
 
-    BORDER = ("#DDE2F1", "#35375F")
-    BORDER_STRONG = ("#C9D0E6", "#474A78")
+    BORDER = ("#D8DEE8", "#2D3A4D")
+    BORDER_STRONG = ("#C5CEDA", "#405069")
 
-    TEXT = ("#171833", "#F7F7FF")
-    MUTED = ("#68708A", "#A8A9C2")
-    SUBTLE = ("#8A91A8", "#777A9B")
+    TEXT = ("#182230", "#F2F4F7")
+    MUTED = ("#667085", "#A3AFBF")
+    SUBTLE = ("#8A94A3", "#728096")
 
-    PRIMARY = ("#3568FF", "#3568FF")
-    PRIMARY_HOVER = ("#2555E8", "#4778FF")
-    CYAN = ("#00A7CC", "#00B8D9")
-    MINT = ("#00C98F", "#00E6A8")
-    VIOLET = ("#7C4DFF", "#9B6CFF")
+    PRIMARY = ("#2563EB", "#4F86F7")
+    PRIMARY_HOVER = ("#1D4ED8", "#6797FA")
 
-    NAV_HOVER = ("#E9EDFF", "#242645")
-    SUCCESS_SOFT = ("#E7FFF5", "#123B35")
-    WARNING_SOFT = ("#FFF5E0", "#3C2A19")
-    DANGER_SOFT = ("#FFE9EF", "#3A1828")
+    CYAN = PRIMARY
+    MINT = PRIMARY
+    VIOLET = ("#64748B", "#8290A6")
 
-    SUCCESS = ("#00A878", "#00D89B")
-    WARNING = ("#E99500", "#FFB020")
-    DANGER = ("#D93455", "#FF4D6D")
+    NAV_HOVER = ("#182436", "#182436")
+    SUCCESS_SOFT = ("#EAF5F1", "#17342F")
+    WARNING_SOFT = ("#FFF4E5", "#3B2E20")
+    DANGER_SOFT = ("#FDECEF", "#3B222A")
+
+    SUCCESS = ("#358C7F", "#55B5A5")
+    WARNING = ("#B97824", "#D5953F")
+    DANGER = ("#C4485D", "#DD5A6E")
+
+
+class Fonts:
+    PRIMARY = "Segoe UI Variable"
+    FALLBACK = "Segoe UI"
 
 
 class Spacing:
@@ -61,10 +67,10 @@ class FontSize:
 
 
 STATUS_COLORS = {
-    "OK": "#00D89B",
-    "INFO": "#3B82F6",
-    "HINWEIS": "#9B6CFF",
-    "WARNUNG": "#FFB020",
-    "KRITISCH": "#FF4D6D",
-    "FEHLER": "#E02D4F",
+    "OK": "#55B5A5",
+    "INFO": "#5B8DEF",
+    "HINWEIS": "#8292AE",
+    "WARNUNG": "#D5953F",
+    "KRITISCH": "#DD5A6E",
+    "FEHLER": "#C94359",
 }

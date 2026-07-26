@@ -1,1 +1,1 @@
-﻿"""Diagrammkomponenten des Diagnostic Toolkits."""
+"""Diagrammkomponenten des Diagnostic Toolkits."""

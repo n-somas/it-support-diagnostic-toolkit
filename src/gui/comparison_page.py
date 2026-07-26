@@ -22,14 +22,14 @@ from src.services.scan_history_service import (
 
 
 CHANGE_STYLES = {
-    "VERBESSERT": ("Verbessert", ("#15803D", "#22C55E")),
-    "UNVERÄNDERT": ("Unverändert", ("#475569", "#94A3B8")),
+    "VERBESSERT": ("Verbessert", ("#358C7F", "#55B5A5")),
+    "UNVERÄNDERT": ("Unverändert", ("#475569", "#A3AFBF")),
     "VERSCHLECHTERT": (
         "Verschlechtert",
-        ("#B91C1C", "#EF4444"),
+        ("#B43B50", "#DD5A6E"),
     ),
     "NEU": ("Neu", ("#0369A1", "#38BDF8")),
-    "ENTFERNT": ("Entfernt", ("#7E22CE", "#A855F7")),
+    "ENTFERNT": ("Entfernt", ("#65738A", "#8292AE")),
 }
 
 
@@ -533,7 +533,7 @@ class ComparisonPage(ctk.CTkFrame):
 
         dark = ctk.get_appearance_mode() == "Dark"
         background = "#2B2B2B" if dark else "#F7F7F7"
-        foreground = "#F3F4F6" if dark else "#1F2937"
+        foreground = "#F3F4F6" if dark else "#192433"
 
         self.figure.patch.set_facecolor(background)
         self.axes.set_facecolor(background)
@@ -565,14 +565,14 @@ class ComparisonPage(ctk.CTkFrame):
             old_values,
             width,
             label="Älterer Scan",
-            color="#64748B",
+            color="#667085",
         )
         self.axes.bar(
             [position + width / 2 for position in positions],
             new_values,
             width,
             label="Neuerer Scan",
-            color="#3B82F6",
+            color="#5B8DEF",
         )
 
         self.axes.set_xticks(

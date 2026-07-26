@@ -6,9 +6,10 @@ import os
 import threading
 from collections import Counter
 from pathlib import Path
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, font as tkfont, messagebox
 
 import customtkinter as ctk
+from matplotlib import rcParams
 
 from src.diagnostic_runner import run_all_diagnostics
 from src.gui.comparison_page import ComparisonPage
@@ -27,27 +28,27 @@ from src.services.scan_history_service import ScanHistoryService
 
 SUMMARY_STYLES = {
     "OK": {
-        "color": ("#15803D", "#22C55E"),
+        "color": ("#358C7F", "#55B5A5"),
         "label": "OK",
     },
     "INFO": {
-        "color": ("#1D4ED8", "#3B82F6"),
+        "color": ("#315FB5", "#5B8DEF"),
         "label": "Info",
     },
     "HINWEIS": {
-        "color": ("#7E22CE", "#A855F7"),
+        "color": ("#65738A", "#8292AE"),
         "label": "Hinweise",
     },
     "WARNUNG": {
-        "color": ("#C2410C", "#F59E0B"),
+        "color": ("#A8651C", "#D5953F"),
         "label": "Warnungen",
     },
     "KRITISCH": {
-        "color": ("#B91C1C", "#EF4444"),
+        "color": ("#B43B50", "#DD5A6E"),
         "label": "Kritisch",
     },
     "FEHLER": {
-        "color": ("#991B1B", "#DC2626"),
+        "color": ("#A92F45", "#C94359"),
         "label": "Fehler",
     },
 }
@@ -96,7 +97,39 @@ class DiagnosticApp(ctk.CTk):
     def __init__(self) -> None:
         super().__init__()
 
-        ctk.set_appearance_mode("dark")
+        available_fonts = set(tkfont.families(self))
+        font_family = (
+            "Segoe UI Variable"
+            if "Segoe UI Variable" in available_fonts
+            else "Segoe UI"
+        )
+
+        font_theme = ctk.ThemeManager.theme.get("CTkFont")
+        if isinstance(font_theme, dict):
+            font_theme["family"] = font_family
+
+        for named_font in (
+            "TkDefaultFont",
+            "TkTextFont",
+            "TkMenuFont",
+            "TkHeadingFont",
+        ):
+            try:
+                tkfont.nametofont(
+                    named_font,
+                    root=self,
+                ).configure(family=font_family)
+            except Exception:
+                pass
+
+        rcParams["font.family"] = [font_family]
+        rcParams["font.sans-serif"] = [
+            font_family,
+            "Segoe UI",
+            "Arial",
+        ]
+
+        ctk.set_appearance_mode("light")
         ctk.set_default_color_theme("blue")
 
         self.title("IT Support Diagnostic Toolkit")
@@ -154,7 +187,7 @@ class DiagnosticApp(ctk.CTk):
             height=88,
             corner_radius=16,
             border_width=1,
-            border_color=("#34375F", "#34375F"),
+            border_color=("#2D3A4D", "#2D3A4D"),
             fg_color=Colors.SIDEBAR_RAISED,
         )
         brand.grid(row=0, column=0, padx=14, pady=(16, 18), sticky="ew")
@@ -188,14 +221,14 @@ class DiagnosticApp(ctk.CTk):
             brand,
             text="Diagnostic Toolkit",
             anchor="w",
-            text_color="#F7F7FF",
+            text_color="#F2F4F7",
             font=ctk.CTkFont(size=14, weight="bold"),
         ).grid(row=0, column=1, padx=(0, 12), pady=(20, 0), sticky="sw")
         ctk.CTkLabel(
             brand,
             text="LOCAL WINDOWS SUPPORT",
             anchor="w",
-            text_color="#8F92B3",
+            text_color="#8A98AA",
             font=ctk.CTkFont(size=9, weight="bold"),
         ).grid(row=1, column=1, padx=(0, 12), pady=(1, 20), sticky="nw")
 
@@ -203,7 +236,7 @@ class DiagnosticApp(ctk.CTk):
             self.sidebar,
             text="ARBEITSBEREICHE",
             anchor="w",
-            text_color="#777A9B",
+            text_color="#728096",
             font=ctk.CTkFont(size=10, weight="bold"),
         ).grid(row=1, column=0, padx=22, pady=(0, 7), sticky="ew")
 
@@ -224,7 +257,7 @@ class DiagnosticApp(ctk.CTk):
                 border_width=0,
                 fg_color="transparent",
                 hover_color=Colors.NAV_HOVER,
-                text_color="#D9DAEC",
+                text_color="#E7ECF3",
                 font=ctk.CTkFont(size=13, weight="bold"),
                 command=lambda selected=page_key: self._show_page(selected),
             )
@@ -235,7 +268,7 @@ class DiagnosticApp(ctk.CTk):
             self.sidebar,
             text="DARSTELLUNG",
             anchor="w",
-            text_color="#777A9B",
+            text_color="#728096",
             font=ctk.CTkFont(size=10, weight="bold"),
         ).grid(row=8, column=0, padx=22, pady=(12, 7), sticky="ew")
 
@@ -248,17 +281,17 @@ class DiagnosticApp(ctk.CTk):
             fg_color=Colors.SIDEBAR_RAISED,
             button_color=Colors.PRIMARY,
             button_hover_color=Colors.PRIMARY_HOVER,
-            text_color="#F7F7FF",
+            text_color="#F2F4F7",
         )
         self.appearance_menu.grid(row=9, column=0, padx=14, sticky="ew")
-        self.appearance_menu.set("Dunkel")
+        self.appearance_menu.set("Hell")
 
         ctk.CTkLabel(
             self.sidebar,
             text="●  Lokale Ausführung\n    Keine Cloud-Übertragung",
             justify="left",
             anchor="w",
-            text_color="#777A9B",
+            text_color="#728096",
             font=ctk.CTkFont(size=10),
         ).grid(row=10, column=0, padx=20, pady=18, sticky="sw")
 
@@ -1471,7 +1504,7 @@ class DiagnosticApp(ctk.CTk):
                 hover_color=(
                     Colors.PRIMARY_HOVER if is_active else Colors.NAV_HOVER
                 ),
-                text_color="#FFFFFF" if is_active else "#D9DAEC",
+                text_color="#FFFFFF" if is_active else "#E7ECF3",
                 border_width=1 if is_active else 0,
                 border_color=Colors.CYAN,
             )

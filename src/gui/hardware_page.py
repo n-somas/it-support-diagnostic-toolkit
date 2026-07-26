@@ -14,12 +14,12 @@ from src.gui.theme import Colors
 
 
 STATUS_COLORS = {
-    "OK": ("#15803D", "#22C55E"),
-    "INFO": ("#1D4ED8", "#3B82F6"),
-    "HINWEIS": ("#7E22CE", "#A855F7"),
-    "WARNUNG": ("#C2410C", "#F59E0B"),
-    "KRITISCH": ("#B91C1C", "#EF4444"),
-    "FEHLER": ("#991B1B", "#DC2626"),
+    "OK": ("#358C7F", "#55B5A5"),
+    "INFO": ("#315FB5", "#5B8DEF"),
+    "HINWEIS": ("#65738A", "#8292AE"),
+    "WARNUNG": ("#A8651C", "#D5953F"),
+    "KRITISCH": ("#B43B50", "#DD5A6E"),
+    "FEHLER": ("#A92F45", "#C94359"),
 }
 
 STATUS_LABELS = {

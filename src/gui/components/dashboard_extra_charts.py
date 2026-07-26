@@ -91,8 +91,8 @@ class BaseChart(ctk.CTkFrame):
 
     def apply_theme(self) -> None:
         dark = ctk.get_appearance_mode() == "Dark"
-        background = "#292A50" if dark else "#FFFFFF"
-        foreground = "#F7F7FF" if dark else "#171833"
+        background = "#192433" if dark else "#FFFFFF"
+        foreground = "#F2F4F7" if dark else "#101722"
 
         self.figure.patch.set_facecolor(background)
         self.axes.set_facecolor(background)
@@ -122,9 +122,9 @@ class BaseChart(ctk.CTkFrame):
             va="center",
             transform=self.axes.transAxes,
             color=(
-                "#A8A9C2"
+                "#A3AFBF"
                 if ctk.get_appearance_mode() == "Dark"
-                else "#64748B"
+                else "#667085"
             ),
         )
         self.axes.set_xticks([])
@@ -138,7 +138,7 @@ class DiskUsageChart(BaseChart):
             master,
             "Speicherbelegung",
             "Belegter und freier Speicher auf Laufwerk C:",
-            250,
+            210,
         )
         self.show_empty("Noch keine Speicherwerte vorhanden.")
 
@@ -177,7 +177,7 @@ class DiskUsageChart(BaseChart):
         self.axes.barh(
             ["C:"],
             [used],
-            color="#3B82F6",
+            color="#5B8DEF",
             label="Belegt",
             height=0.38,
         )
@@ -185,20 +185,20 @@ class DiskUsageChart(BaseChart):
             ["C:"],
             [free],
             left=[used],
-            color="#22C55E",
+            color="#55B5A5",
             label="Frei",
             height=0.38,
         )
-        self.axes.set_xlabel("Gigabyte")
+        self.axes.set_xlabel("Gigabyte", labelpad=3)
         self.axes.legend(
             loc="upper center",
             bbox_to_anchor=(0.5, 1.18),
             ncol=2,
             frameon=False,
             labelcolor=(
-                "#F8FAFC"
+                "#F2F4F7"
                 if ctk.get_appearance_mode() == "Dark"
-                else "#111827"
+                else "#101722"
             ),
         )
         self.finish()
@@ -291,7 +291,7 @@ class HistoryChart(BaseChart):
             color=(
                 "#FFFFFF"
                 if ctk.get_appearance_mode() == "Dark"
-                else "#111827"
+                else "#101722"
             ),
             label="Probleme gesamt",
         )
@@ -305,9 +305,9 @@ class HistoryChart(BaseChart):
             frameon=False,
             fontsize=8,
             labelcolor=(
-                "#F8FAFC"
+                "#F2F4F7"
                 if ctk.get_appearance_mode() == "Dark"
-                else "#111827"
+                else "#101722"
             ),
         )
         self.finish()
