@@ -9,6 +9,7 @@ from src.checks.firewall_check import get_firewall_info
 from src.checks.hardware_check import get_hardware_info
 from src.checks.network_check import get_network_info
 from src.checks.open_ports_check import get_open_ports_info
+from src.checks.startup_programs_check import get_startup_programs_info
 from src.checks.system_info import get_system_info
 from src.checks.windows_update_check import get_windows_update_info
 from src.checks.windows_services_check import get_windows_services_info
@@ -27,6 +28,7 @@ DIAGNOSTIC_CHECKS = [
     ("Windows Update Prüfung", get_windows_update_info),
     ("Windows-Dienste Prüfung", get_windows_services_info),
     ("Windows-Ereignisse Prüfung", get_windows_event_info),
+    ("Autostartprogramme Prüfung", get_startup_programs_info),
     ("Offene Ports Prüfung", get_open_ports_info),
     ("BitLocker Prüfung", get_bitlocker_info),
 ]

@@ -30,3 +30,4 @@ upgrade_windows_services_check.py
 upgrade_windows_event_check.py
 .design_backup/
 apply_enterprise_colors_typography.py
+install_startup_and_storage_history.py

@@ -18,6 +18,7 @@ from src.gui.components.charts.status_bar_chart import StatusBarChart
 from src.gui.components.dashboard_extra_charts import (
     DiskUsageChart,
     HistoryChart,
+    StorageHistoryChart,
 )
 from src.gui.result_card import ResultCard
 from src.gui.hardware_page import HardwarePage
@@ -1226,14 +1227,59 @@ class DiagnosticApp(ctk.CTk):
             sticky="nsew",
         )
         body.grid_columnconfigure(0, weight=1)
-        body.grid_rowconfigure(0, weight=1)
+        body.grid_rowconfigure(1, weight=1)
 
-        self.history_chart = HistoryChart(body)
+        self.history_view_switch = ctk.CTkSegmentedButton(
+            body,
+            values=[
+                "Diagnosestatus",
+                "Speicherbelegung",
+            ],
+            height=36,
+            corner_radius=9,
+            selected_color=Colors.PRIMARY,
+            selected_hover_color=Colors.PRIMARY_HOVER,
+            unselected_color=Colors.SURFACE_RAISED,
+            unselected_hover_color=Colors.NAV_HOVER,
+            text_color=Colors.TEXT,
+            command=self._show_history_view,
+        )
+        self.history_view_switch.grid(
+            row=0,
+            column=0,
+            pady=(0, 10),
+            sticky="w",
+        )
+        self.history_view_switch.set("Diagnosestatus")
+
+        chart_container = ctk.CTkFrame(
+            body,
+            fg_color="transparent",
+        )
+        chart_container.grid(
+            row=1,
+            column=0,
+            sticky="nsew",
+        )
+        chart_container.grid_columnconfigure(0, weight=1)
+        chart_container.grid_rowconfigure(0, weight=1)
+
+        self.history_chart = HistoryChart(chart_container)
         self.history_chart.grid(
             row=0,
             column=0,
             sticky="nsew",
         )
+
+        self.storage_history_chart = StorageHistoryChart(
+            chart_container
+        )
+        self.storage_history_chart.grid(
+            row=0,
+            column=0,
+            sticky="nsew",
+        )
+        self.storage_history_chart.grid_remove()
 
         info = ctk.CTkFrame(
             body,
@@ -1243,7 +1289,7 @@ class DiagnosticApp(ctk.CTk):
             fg_color=Colors.SURFACE_RAISED,
         )
         info.grid(
-            row=1,
+            row=2,
             column=0,
             pady=(14, 0),
             sticky="ew",
@@ -1298,6 +1344,14 @@ class DiagnosticApp(ctk.CTk):
             padx=18,
             pady=14,
         )
+
+    def _show_history_view(self, value: str) -> None:
+        if value == "Speicherbelegung":
+            self.history_chart.grid_remove()
+            self.storage_history_chart.grid()
+        else:
+            self.storage_history_chart.grid_remove()
+            self.history_chart.grid()
 
     def _create_comparison_page(self) -> None:
         # Erstellt den Diagnosevergleich im Hauptfenster.
@@ -1737,6 +1791,7 @@ class DiagnosticApp(ctk.CTk):
             limit=10
         )
         self.history_chart.update_records(records)
+        self.storage_history_chart.update_records(records)
 
         total = len(
             self.history_service.list_scans()

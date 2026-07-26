@@ -319,3 +319,158 @@ class HistoryChart(BaseChart):
             return f"{date_part[5:]} {time_part[:5]}"
         except ValueError:
             return value
+
+
+class StorageHistoryChart(BaseChart):
+    """Zeigt die Entwicklung von belegtem und freiem Speicher."""
+
+    def __init__(self, master) -> None:
+        super().__init__(
+            master,
+            "Verlauf der Speicherbelegung",
+            "Belegter und freier Speicher der letzten zehn Scans",
+            300,
+        )
+        self.show_empty(
+            "Nach gespeicherten Diagnosen erscheint hier "
+            "die Speicherentwicklung."
+        )
+
+    def update_records(self, records: list[dict]) -> None:
+        points: list[tuple[str, float, float, float]] = []
+
+        for record in records:
+            usage = record.get("disk_usage")
+            if not isinstance(usage, dict):
+                continue
+
+            used = self._number(usage.get("used_gb"))
+            free = self._number(usage.get("free_gb"))
+            total = self._number(usage.get("total_gb"))
+
+            if used is None or free is None:
+                continue
+            if total is None:
+                total = used + free
+
+            points.append(
+                (
+                    self._label(
+                        str(record.get("created_at", ""))
+                    ),
+                    used,
+                    free,
+                    total,
+                )
+            )
+
+        if not points:
+            self.show_empty(
+                "In den gespeicherten Diagnosen wurden "
+                "keine Speicherwerte gefunden."
+            )
+            return
+
+        labels = [point[0] for point in points]
+        used_values = [point[1] for point in points]
+        free_values = [point[2] for point in points]
+        total_values = [point[3] for point in points]
+        positions = list(range(len(points)))
+
+        self.axes.clear()
+        self.apply_theme()
+
+        self.axes.plot(
+            positions,
+            used_values,
+            color="#5B8DEF",
+            marker="o",
+            linewidth=2.2,
+            markersize=4,
+            label="Belegt",
+        )
+        self.axes.fill_between(
+            positions,
+            used_values,
+            color="#5B8DEF",
+            alpha=0.10,
+        )
+        self.axes.plot(
+            positions,
+            free_values,
+            color="#55B5A5",
+            marker="o",
+            linewidth=2.0,
+            markersize=4,
+            label="Frei",
+        )
+        self.axes.plot(
+            positions,
+            total_values,
+            color=(
+                "#A3AFBF"
+                if ctk.get_appearance_mode() == "Dark"
+                else "#667085"
+            ),
+            linestyle="--",
+            linewidth=1.2,
+            label="Gesamt",
+        )
+
+        self.axes.set_xticks(positions)
+        self.axes.set_xticklabels(
+            labels,
+            rotation=25,
+            ha="right",
+        )
+        self.axes.set_ylabel("Gigabyte")
+        self.axes.grid(
+            axis="y",
+            alpha=0.12,
+            linewidth=0.8,
+        )
+        self.axes.set_axisbelow(True)
+        self.axes.margins(x=0.04, y=0.12)
+
+        text_color = (
+            "#F2F4F7"
+            if ctk.get_appearance_mode() == "Dark"
+            else "#101722"
+        )
+        self.axes.legend(
+            loc="upper center",
+            bbox_to_anchor=(0.5, 1.18),
+            ncol=3,
+            frameon=False,
+            fontsize=9,
+            labelcolor=text_color,
+        )
+
+        self.axes.annotate(
+            f"{used_values[-1]:.1f} GB belegt",
+            xy=(positions[-1], used_values[-1]),
+            xytext=(0, 10),
+            textcoords="offset points",
+            ha="center",
+            fontsize=8,
+            color=text_color,
+        )
+
+        self.finish()
+
+    @staticmethod
+    def _number(value) -> float | None:
+        if value is None:
+            return None
+        try:
+            return float(str(value).replace(",", "."))
+        except ValueError:
+            return None
+
+    @staticmethod
+    def _label(value: str) -> str:
+        try:
+            date_part, time_part = value.split("T", 1)
+            return f"{date_part[5:]} {time_part[:5]}"
+        except ValueError:
+            return value

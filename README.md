@@ -24,6 +24,7 @@ Das Projekt wurde als praxisnahes Portfolio-Projekt für IT-Support, Systemadmin
 - automatisierte Prüfung von System-, Netzwerk- und Sicherheitsbereichen
 - Prüfung ausgewählter Windows-Dienste mit kontextbezogener Bewertung
 - datenschutzfreundliche Auswertung kritischer und fehlerhafter Windows-Ereignisse
+- Analyse von Windows-Autostartprogrammen mit Signatur-, Pfad- und Befehlsprüfung
 - Hardwareinventarisierung für CPU, RAM, GPU, Mainboard, BIOS, Laufwerke und Netzwerkadapter
 - Prüfung auf Geräte mit auffälligem Status
 - Erkennung verfügbarer Windows- und Treiberupdates
@@ -33,7 +34,7 @@ Das Projekt wurde als praxisnahes Portfolio-Projekt für IT-Support, Systemadmin
 - kompaktes Aktionszentrum für aktuelle Probleme
 - vollständig anklickbare Problemkarten
 - filterbare Diagnoseergebnisse mit strukturierter Detailansicht
-- Diagramme für Statusverteilung und Speicherbelegung
+- Diagramme für Statusverteilung, aktuelle Speicherbelegung und Speicherverlauf
 - lokale Scan-Historie
 - integrierter Vergleich zweier Diagnoseläufe
 - intelligente Bewertung technischer Veränderungen
@@ -64,7 +65,7 @@ Die Hardwareübersicht zeigt Prozessor, Arbeitsspeicher, Grafikkarten, Mainboard
 
 ### Diagnoseverlauf
 
-Gespeicherte Diagnoseläufe werden als zeitlicher Verlauf dargestellt. Die Statusentwicklung und die Gesamtzahl erkannter Probleme lassen sich dadurch nachvollziehen.
+Gespeicherte Diagnoseläufe werden als zeitlicher Verlauf dargestellt. Neben der Statusentwicklung lässt sich die belegte und freie Speicherkapazität von Laufwerk C: über mehrere Scans nachvollziehen.
 
 ![Verlauf gespeicherter Diagnoseläufe](docs/images/history.png)
 
@@ -103,6 +104,7 @@ Berichte können als Markdown-Dateien erstellt und exportiert werden. Auf einen 
 | Windows Update | Verfügbare Windows- und Treiberupdates, letztes installiertes Update und Neustartbedarf |
 | Windows-Dienste | Status und Starttyp ausgewählter Support-, Netzwerk- und Wartungsdienste |
 | Windows-Ereignisse | Kritische und fehlerhafte Ereignisse aus System und Application mit Gruppierung, Bewertung und Handlungsempfehlungen |
+| Autostartprogramme | Startbefehle, Zieldateien, digitale Signaturen und auffällige Startmechanismen |
 | Offene Ports | Lokale TCP-Listening-Ports, zugehörige Prozesse und auffällige Standardports |
 | BitLocker | Verschlüsselungsstatus, Schutzstatus und Verschlüsselungsgrad von Laufwerk C: |
 | Scan-Historie | Lokale Speicherung vergangener Diagnosen |
@@ -212,7 +214,7 @@ Diagnoseläufe werden lokal als JSON-Dateien gespeichert:
 data\scans
 ```
 
-Die gespeicherten Daten werden für den Diagnoseverlauf und den Vergleich zweier Scans verwendet.
+Die gespeicherten Daten werden für den Diagnoseverlauf, den Verlauf der Speicherbelegung und den Vergleich zweier Scans verwendet.
 
 ## Projektstruktur
 
@@ -265,8 +267,6 @@ Das Tool überträgt keine Diagnosedaten automatisch an externe Dienste.
 
 ## Roadmap
 
-- Analyse von Autostartprogrammen
-- Verlauf der Speicherbelegung
 - HTML- und PDF-Berichte
 - aktivierbare Diagnosemodule
 - Export und Import der Scan-Historie
