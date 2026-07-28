@@ -135,7 +135,7 @@ class DiagnosticApp(ctk.CTk):
             "Arial",
         ]
 
-        ctk.set_appearance_mode("light")
+        ctk.set_appearance_mode("system")
         ctk.set_default_color_theme("blue")
 
         self.title("IT Support Diagnostic Toolkit")
@@ -292,7 +292,7 @@ class DiagnosticApp(ctk.CTk):
             text_color="#F2F4F7",
         )
         self.appearance_menu.grid(row=10, column=0, padx=14, sticky="ew")
-        self.appearance_menu.set("Hell")
+        self.appearance_menu.set("System")
 
         ctk.CTkLabel(
             self.sidebar,
@@ -1250,48 +1250,189 @@ class DiagnosticApp(ctk.CTk):
             sticky="nsew",
         )
         body.grid_columnconfigure(0, weight=1)
-        body.grid_rowconfigure(1, weight=1)
+
+        controls = ctk.CTkFrame(
+            body,
+            height=58,
+            corner_radius=14,
+            border_width=1,
+            border_color=Colors.BORDER,
+            fg_color=Colors.SURFACE_RAISED,
+        )
+        controls.grid(
+            row=0,
+            column=0,
+            pady=(0, 10),
+            sticky="ew",
+        )
+        controls.grid_propagate(False)
+        controls.grid_columnconfigure(0, weight=1)
+
+        ctk.CTkLabel(
+            controls,
+            text="Darstellung des Diagnoseverlaufs",
+            anchor="w",
+            text_color=Colors.TEXT,
+            font=ctk.CTkFont(size=12, weight="bold"),
+        ).grid(
+            row=0,
+            column=0,
+            padx=15,
+            pady=18,
+            sticky="w",
+        )
 
         self.history_view_switch = ctk.CTkSegmentedButton(
-            body,
+            controls,
             values=[
                 "Diagnosestatus",
                 "Speicherbelegung",
             ],
-            height=36,
-            corner_radius=9,
+            height=32,
+            corner_radius=8,
             selected_color=Colors.PRIMARY,
             selected_hover_color=Colors.PRIMARY_HOVER,
-            unselected_color=Colors.SURFACE_RAISED,
+            unselected_color=Colors.SURFACE_SOFT,
             unselected_hover_color=Colors.NAV_HOVER,
             text_color=Colors.TEXT,
             command=self._show_history_view,
         )
         self.history_view_switch.grid(
             row=0,
-            column=0,
-            pady=(0, 10),
-            sticky="w",
+            column=1,
+            padx=13,
+            pady=13,
+            sticky="e",
         )
         self.history_view_switch.set("Diagnosestatus")
+
+        metrics = ctk.CTkFrame(
+            body,
+            fg_color="transparent",
+        )
+        metrics.grid(
+            row=1,
+            column=0,
+            pady=(0, 10),
+            sticky="ew",
+        )
+
+        definitions = (
+            (
+                "GESPEICHERTE SCANS",
+                "history_total_value_label",
+                "0",
+                "Lokale Diagnosehistorie",
+            ),
+            (
+                "IM DIAGRAMM",
+                "history_window_value_label",
+                "0 von 10",
+                "Aktuell dargestellte Scans",
+            ),
+            (
+                "LETZTER SCAN",
+                "history_latest_value_label",
+                "Noch keine Daten",
+                "Zeitpunkt der letzten Diagnose",
+            ),
+        )
+
+        for column, (
+            title,
+            attribute,
+            initial,
+            detail,
+        ) in enumerate(definitions):
+            metrics.grid_columnconfigure(
+                column,
+                weight=1,
+                uniform="history_metrics",
+            )
+
+            card = ctk.CTkFrame(
+                metrics,
+                height=82,
+                corner_radius=14,
+                border_width=1,
+                border_color=Colors.BORDER,
+                fg_color=Colors.SURFACE_RAISED,
+            )
+            card.grid(
+                row=0,
+                column=column,
+                padx=(
+                    (0, 5)
+                    if column == 0
+                    else (5, 5)
+                    if column < len(definitions) - 1
+                    else (5, 0)
+                ),
+                sticky="ew",
+            )
+            card.grid_propagate(False)
+            card.grid_columnconfigure(0, weight=1)
+
+            ctk.CTkLabel(
+                card,
+                text=title,
+                anchor="w",
+                text_color=Colors.MUTED,
+                font=ctk.CTkFont(size=8, weight="bold"),
+            ).grid(
+                row=0,
+                column=0,
+                padx=13,
+                pady=(9, 0),
+                sticky="w",
+            )
+
+            value_label = ctk.CTkLabel(
+                card,
+                text=initial,
+                anchor="w",
+                text_color=Colors.TEXT,
+                font=ctk.CTkFont(size=15, weight="bold"),
+            )
+            value_label.grid(
+                row=1,
+                column=0,
+                padx=13,
+                pady=(1, 0),
+                sticky="w",
+            )
+            setattr(self, attribute, value_label)
+
+            ctk.CTkLabel(
+                card,
+                text=detail,
+                anchor="w",
+                text_color=Colors.MUTED,
+                font=ctk.CTkFont(size=8),
+            ).grid(
+                row=2,
+                column=0,
+                padx=13,
+                pady=(0, 9),
+                sticky="w",
+            )
 
         chart_container = ctk.CTkFrame(
             body,
             fg_color="transparent",
         )
         chart_container.grid(
-            row=1,
+            row=2,
             column=0,
-            sticky="nsew",
+            sticky="ew",
         )
         chart_container.grid_columnconfigure(0, weight=1)
-        chart_container.grid_rowconfigure(0, weight=1)
 
         self.history_chart = HistoryChart(chart_container)
         self.history_chart.grid(
             row=0,
             column=0,
-            sticky="nsew",
+            sticky="ew",
         )
 
         self.storage_history_chart = StorageHistoryChart(
@@ -1300,72 +1441,71 @@ class DiagnosticApp(ctk.CTk):
         self.storage_history_chart.grid(
             row=0,
             column=0,
-            sticky="nsew",
+            sticky="ew",
         )
         self.storage_history_chart.grid_remove()
 
         info = ctk.CTkFrame(
             body,
-            corner_radius=16,
+            height=58,
+            corner_radius=14,
             border_width=1,
             border_color=Colors.BORDER,
             fg_color=Colors.SURFACE_RAISED,
         )
         info.grid(
-            row=2,
+            row=3,
             column=0,
-            pady=(14, 0),
+            pady=(10, 0),
             sticky="ew",
         )
-        info.grid_columnconfigure(0, weight=1)
+        info.grid_propagate(False)
+        info.grid_columnconfigure(1, weight=1)
+
+        ctk.CTkFrame(
+            info,
+            width=4,
+            corner_radius=2,
+            fg_color=Colors.PRIMARY,
+        ).grid(
+            row=0,
+            column=0,
+            rowspan=2,
+            padx=(0, 13),
+            pady=11,
+            sticky="ns",
+        )
 
         self.history_count_label = ctk.CTkLabel(
             info,
             text="Noch keine gespeicherten Diagnosen.",
             anchor="w",
             text_color=Colors.TEXT,
-            font=ctk.CTkFont(
-                size=14,
-                weight="bold",
-            ),
+            font=ctk.CTkFont(size=11, weight="bold"),
         )
         self.history_count_label.grid(
             row=0,
-            column=0,
-            padx=18,
-            pady=(14, 3),
+            column=1,
+            padx=(0, 14),
+            pady=(10, 0),
             sticky="w",
         )
 
         ctk.CTkLabel(
             info,
             text=(
-                "Für einen Vergleich werden mindestens zwei "
-                "Diagnoseläufe mit Detaildaten benötigt."
+                "Die Historie bleibt lokal auf diesem Windows-PC "
+                "und wird nach jeder Diagnose aktualisiert."
             ),
             anchor="w",
             text_color=Colors.MUTED,
-            font=ctk.CTkFont(size=12),
+            font=ctk.CTkFont(size=9),
         ).grid(
             row=1,
-            column=0,
-            padx=18,
-            pady=(0, 14),
-            sticky="w",
-        )
-
-        ctk.CTkButton(
-            info,
-            text="Diagnosen vergleichen",
-            width=190,
-            height=38,
-            command=self._open_comparison,
-        ).grid(
-            row=0,
             column=1,
-            rowspan=2,
-            padx=18,
-            pady=14,
+            padx=(0, 14),
+            pady=(0, 9),
+            sticky="w",
         )
 
     def _show_history_view(self, value: str) -> None:
@@ -1829,6 +1969,32 @@ class DiagnosticApp(ctk.CTk):
             text = f"{total} Diagnosen sind lokal gespeichert."
 
         self.history_count_label.configure(text=text)
+        self.history_total_value_label.configure(
+            text=str(total)
+        )
+        self.history_window_value_label.configure(
+            text=f"{len(records)} von 10"
+        )
+
+        latest_text = "Noch keine Daten"
+
+        if records:
+            raw_value = str(
+                records[-1].get("created_at", "")
+            )
+
+            try:
+                date_part, time_part = raw_value.split("T", 1)
+                latest_text = (
+                    f"{date_part[8:10]}.{date_part[5:7]}. "
+                    f"{time_part[:5]}"
+                )
+            except (ValueError, IndexError):
+                latest_text = raw_value or "Noch keine Daten"
+
+        self.history_latest_value_label.configure(
+            text=latest_text
+        )
 
     def _open_comparison(self) -> None:
         # Öffnet den Vergleich als Seite der Hauptanwendung.

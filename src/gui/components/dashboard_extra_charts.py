@@ -223,12 +223,14 @@ class DiskUsageChart(BaseChart):
 
 
 class HistoryChart(BaseChart):
+    """Zeigt Statusverteilung und Problemtrend der letzten Scans."""
+
     def __init__(self, master) -> None:
         super().__init__(
             master,
             "Diagnoseverlauf",
-            "Gestapelte Statusentwicklung der letzten zehn Scans",
-            300,
+            "Statusverteilung und Problemtrend der letzten zehn Scans",
+            330,
         )
         self.show_empty(
             "Nach mehreren Scans erscheint hier die Entwicklung."
@@ -242,9 +244,10 @@ class HistoryChart(BaseChart):
             return
 
         labels = [
-            self._label(record.get("created_at", ""))
+            self._label(str(record.get("created_at", "")))
             for record in records
         ]
+        positions = list(range(len(labels)))
 
         values = {
             status: [
@@ -262,19 +265,27 @@ class HistoryChart(BaseChart):
         self.axes.clear()
         self.apply_theme()
 
-        self.axes.stackplot(
-            labels,
-            [values[status] for status in STATUS_ORDER],
-            labels=[
-                STATUS_LABELS[status]
-                for status in STATUS_ORDER
-            ],
-            colors=[
-                STATUS_COLORS[status]
-                for status in STATUS_ORDER
-            ],
-            alpha=0.75,
-        )
+        bottom = [0] * len(labels)
+
+        for status in STATUS_ORDER:
+            series = values[status]
+
+            if not any(series):
+                continue
+
+            self.axes.bar(
+                positions,
+                series,
+                bottom=bottom,
+                width=0.66,
+                color=STATUS_COLORS[status],
+                label=STATUS_LABELS[status],
+                alpha=0.88,
+            )
+            bottom = [
+                current + addition
+                for current, addition in zip(bottom, series)
+            ]
 
         problems = [
             values["WARNUNG"][index]
@@ -283,41 +294,76 @@ class HistoryChart(BaseChart):
             for index in range(len(labels))
         ]
 
+        text_color = (
+            "#F2F4F7"
+            if ctk.get_appearance_mode() == "Dark"
+            else "#101722"
+        )
+
         self.axes.plot(
-            labels,
+            positions,
             problems,
             marker="o",
-            linewidth=2,
-            color=(
-                "#FFFFFF"
-                if ctk.get_appearance_mode() == "Dark"
-                else "#101722"
-            ),
+            markersize=5,
+            linewidth=2.1,
+            color=text_color,
+            markerfacecolor="#FFFFFF",
+            markeredgecolor=text_color,
             label="Probleme gesamt",
+            zorder=5,
         )
-        self.axes.set_ylabel("Anzahl")
-        self.axes.grid(axis="y", alpha=0.10)
-        self.axes.tick_params(axis="x", rotation=25)
+
+        self.axes.set_xticks(positions)
+        self.axes.set_xticklabels(labels)
+        self.axes.set_ylabel("Prüfungen")
+        self.axes.grid(
+            axis="y",
+            alpha=0.12,
+            linewidth=0.8,
+        )
+        self.axes.set_axisbelow(True)
+        self.axes.margins(x=0.025)
+        self.axes.set_ylim(
+            0,
+            max(bottom + problems + [1]) + 1,
+        )
+
         self.axes.legend(
             loc="upper center",
-            bbox_to_anchor=(0.5, 1.25),
-            ncol=4,
+            bbox_to_anchor=(0.5, 1.17),
+            ncol=7,
             frameon=False,
             fontsize=8,
-            labelcolor=(
-                "#F2F4F7"
-                if ctk.get_appearance_mode() == "Dark"
-                else "#101722"
-            ),
+            labelcolor=text_color,
+            handlelength=1.4,
+            columnspacing=1.0,
         )
-        self.finish()
+
+        self.axes.annotate(
+            f"{problems[-1]} Probleme",
+            xy=(positions[-1], problems[-1]),
+            xytext=(-7, 12),
+            textcoords="offset points",
+            ha="right",
+            fontsize=8,
+            color=text_color,
+        )
+
+        self.figure.tight_layout(
+            pad=1.1,
+            rect=(0.01, 0.01, 0.99, 0.90),
+        )
+        self.canvas.draw_idle()
 
     @staticmethod
     def _label(value: str) -> str:
         try:
             date_part, time_part = value.split("T", 1)
-            return f"{date_part[5:]} {time_part[:5]}"
-        except ValueError:
+            return (
+                f"{date_part[8:10]}.{date_part[5:7]}.\n"
+                f"{time_part[:5]}"
+            )
+        except (ValueError, IndexError):
             return value
 
 
@@ -329,7 +375,7 @@ class StorageHistoryChart(BaseChart):
             master,
             "Verlauf der Speicherbelegung",
             "Belegter und freier Speicher der letzten zehn Scans",
-            300,
+            330,
         )
         self.show_empty(
             "Nach gespeicherten Diagnosen erscheint hier "
@@ -341,6 +387,7 @@ class StorageHistoryChart(BaseChart):
 
         for record in records:
             usage = record.get("disk_usage")
+
             if not isinstance(usage, dict):
                 continue
 
@@ -350,6 +397,7 @@ class StorageHistoryChart(BaseChart):
 
             if used is None or free is None:
                 continue
+
             if total is None:
                 total = used + free
 
@@ -385,8 +433,8 @@ class StorageHistoryChart(BaseChart):
             used_values,
             color="#5B8DEF",
             marker="o",
-            linewidth=2.2,
-            markersize=4,
+            linewidth=2.3,
+            markersize=5,
             label="Belegt",
         )
         self.axes.fill_between(
@@ -400,8 +448,8 @@ class StorageHistoryChart(BaseChart):
             free_values,
             color="#55B5A5",
             marker="o",
-            linewidth=2.0,
-            markersize=4,
+            linewidth=2.1,
+            markersize=5,
             label="Frei",
         )
         self.axes.plot(
@@ -413,16 +461,12 @@ class StorageHistoryChart(BaseChart):
                 else "#667085"
             ),
             linestyle="--",
-            linewidth=1.2,
+            linewidth=1.3,
             label="Gesamt",
         )
 
         self.axes.set_xticks(positions)
-        self.axes.set_xticklabels(
-            labels,
-            rotation=25,
-            ha="right",
-        )
+        self.axes.set_xticklabels(labels)
         self.axes.set_ylabel("Gigabyte")
         self.axes.grid(
             axis="y",
@@ -430,7 +474,7 @@ class StorageHistoryChart(BaseChart):
             linewidth=0.8,
         )
         self.axes.set_axisbelow(True)
-        self.axes.margins(x=0.04, y=0.12)
+        self.axes.margins(x=0.03, y=0.15)
 
         text_color = (
             "#F2F4F7"
@@ -439,7 +483,7 @@ class StorageHistoryChart(BaseChart):
         )
         self.axes.legend(
             loc="upper center",
-            bbox_to_anchor=(0.5, 1.18),
+            bbox_to_anchor=(0.5, 1.16),
             ncol=3,
             frameon=False,
             fontsize=9,
@@ -449,19 +493,24 @@ class StorageHistoryChart(BaseChart):
         self.axes.annotate(
             f"{used_values[-1]:.1f} GB belegt",
             xy=(positions[-1], used_values[-1]),
-            xytext=(0, 10),
+            xytext=(-8, 12),
             textcoords="offset points",
-            ha="center",
+            ha="right",
             fontsize=8,
             color=text_color,
         )
 
-        self.finish()
+        self.figure.tight_layout(
+            pad=1.1,
+            rect=(0.01, 0.01, 0.99, 0.90),
+        )
+        self.canvas.draw_idle()
 
     @staticmethod
     def _number(value) -> float | None:
         if value is None:
             return None
+
         try:
             return float(str(value).replace(",", "."))
         except ValueError:
@@ -471,6 +520,9 @@ class StorageHistoryChart(BaseChart):
     def _label(value: str) -> str:
         try:
             date_part, time_part = value.split("T", 1)
-            return f"{date_part[5:]} {time_part[:5]}"
-        except ValueError:
+            return (
+                f"{date_part[8:10]}.{date_part[5:7]}.\n"
+                f"{time_part[:5]}"
+            )
+        except (ValueError, IndexError):
             return value
