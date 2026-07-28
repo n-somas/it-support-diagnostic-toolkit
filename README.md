@@ -1,4 +1,4 @@
-# IT Support Diagnostic Toolkit
+﻿# IT Support Diagnostic Toolkit
 
 Eine lokale Windows-Diagnoseanwendung zur automatisierten Prüfung typischer Support-, Hardware-, Netzwerk- und Sicherheitsbereiche.
 
@@ -278,3 +278,4 @@ Das Tool überträgt keine Diagnosedaten automatisch an externe Dienste.
 **Funktionsfähige Windows-Desktopanwendung mit mehreren Diagnosemodulen, Hardwareinventar, grafischem Dashboard, interaktiven Problemkarten, Updateprüfung, Scan-Historie, integriertem Diagnosevergleich, Markdown-Berichten und EXE-Build.**
 
 Das Projekt wird schrittweise weiterentwickelt.
+
