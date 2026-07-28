@@ -22,6 +22,7 @@ Das Projekt wurde als praxisnahes Portfolio-Projekt für IT-Support, Systemadmin
 
 - moderne Windows-Oberfläche mit fester Seitenleiste
 - automatisierte Prüfung von System-, Netzwerk- und Sicherheitsbereichen
+- Analyse aktiver Netzwerkadapter, IP-Konfiguration, Paketverlust und Latenz
 - Prüfung ausgewählter Windows-Dienste mit kontextbezogener Bewertung
 - datenschutzfreundliche Auswertung kritischer und fehlerhafter Windows-Ereignisse
 - Analyse von Windows-Autostartprogrammen mit Signatur-, Pfad- und Befehlsprüfung
@@ -97,7 +98,7 @@ Berichte können als Markdown-Dateien erstellt und exportiert werden. Auf einen 
 | Systeminformationen | Computername, Benutzername, Betriebssystem, Architektur und grundlegende Systemdaten |
 | Hardwareinventar | Prozessor, Arbeitsspeicher, Grafikkarten, Mainboard, BIOS, Laufwerke und Netzwerkadapter |
 | Gerätestatus | Erkennung vorhandener Geräte mit auffälligem oder fehlerhaftem Status |
-| Netzwerkprüfung | Aktive IP-Adresse, Standardgateway, Erreichbarkeit und DNS-Auflösung |
+| Netzwerkprüfung | Aktive physische und virtuelle Adapter, Link-Geschwindigkeit, DHCP, IPv4, Gateway, DNS, Netzwerkprofil, Paketverlust und Latenz |
 | Speicherplatzprüfung | Gesamt-, belegter und freier Speicherplatz mit automatischer Bewertung |
 | Firewallprüfung | Status der Windows-Firewall für Domänen-, private und öffentliche Profile |
 | Defenderprüfung | Echtzeitschutz, Antivirus-Status, Signaturinformationen und Schutzstatus |

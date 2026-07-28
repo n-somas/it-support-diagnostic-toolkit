@@ -31,3 +31,4 @@ upgrade_windows_event_check.py
 .design_backup/
 apply_enterprise_colors_typography.py
 install_startup_and_storage_history.py
+install_network_quality_analysis.py
