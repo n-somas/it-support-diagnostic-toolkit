@@ -1253,7 +1253,6 @@ class DiagnosticApp(ctk.CTk):
 
         controls = ctk.CTkFrame(
             body,
-            height=58,
             corner_radius=14,
             border_width=1,
             border_color=Colors.BORDER,
@@ -1265,20 +1264,46 @@ class DiagnosticApp(ctk.CTk):
             pady=(0, 10),
             sticky="ew",
         )
-        controls.grid_propagate(False)
         controls.grid_columnconfigure(0, weight=1)
 
-        ctk.CTkLabel(
+        control_text = ctk.CTkFrame(
             controls,
+            fg_color="transparent",
+        )
+        control_text.grid(
+            row=0,
+            column=0,
+            padx=16,
+            pady=12,
+            sticky="w",
+        )
+
+        ctk.CTkLabel(
+            control_text,
             text="Darstellung des Diagnoseverlaufs",
             anchor="w",
             text_color=Colors.TEXT,
-            font=ctk.CTkFont(size=12, weight="bold"),
+            font=ctk.CTkFont(
+                size=13,
+                weight="bold",
+            ),
         ).grid(
             row=0,
             column=0,
-            padx=15,
-            pady=18,
+            sticky="w",
+        )
+
+        self.history_count_label = ctk.CTkLabel(
+            control_text,
+            text="Noch keine gespeicherten Diagnosen.",
+            anchor="w",
+            text_color=Colors.MUTED,
+            font=ctk.CTkFont(size=10),
+        )
+        self.history_count_label.grid(
+            row=1,
+            column=0,
+            pady=(2, 0),
             sticky="w",
         )
 
@@ -1288,8 +1313,8 @@ class DiagnosticApp(ctk.CTk):
                 "Diagnosestatus",
                 "Speicherbelegung",
             ],
-            height=32,
-            corner_radius=8,
+            height=34,
+            corner_radius=9,
             selected_color=Colors.PRIMARY,
             selected_hover_color=Colors.PRIMARY_HOVER,
             unselected_color=Colors.SURFACE_SOFT,
@@ -1300,8 +1325,8 @@ class DiagnosticApp(ctk.CTk):
         self.history_view_switch.grid(
             row=0,
             column=1,
-            padx=13,
-            pady=13,
+            padx=14,
+            pady=14,
             sticky="e",
         )
         self.history_view_switch.set("Diagnosestatus")
@@ -1322,19 +1347,16 @@ class DiagnosticApp(ctk.CTk):
                 "GESPEICHERTE SCANS",
                 "history_total_value_label",
                 "0",
-                "Lokale Diagnosehistorie",
             ),
             (
                 "IM DIAGRAMM",
                 "history_window_value_label",
                 "0 von 10",
-                "Aktuell dargestellte Scans",
             ),
             (
                 "LETZTER SCAN",
                 "history_latest_value_label",
                 "Noch keine Daten",
-                "Zeitpunkt der letzten Diagnose",
             ),
         )
 
@@ -1342,7 +1364,6 @@ class DiagnosticApp(ctk.CTk):
             title,
             attribute,
             initial,
-            detail,
         ) in enumerate(definitions):
             metrics.grid_columnconfigure(
                 column,
@@ -1352,7 +1373,6 @@ class DiagnosticApp(ctk.CTk):
 
             card = ctk.CTkFrame(
                 metrics,
-                height=82,
                 corner_radius=14,
                 border_width=1,
                 border_color=Colors.BORDER,
@@ -1370,20 +1390,34 @@ class DiagnosticApp(ctk.CTk):
                 ),
                 sticky="ew",
             )
-            card.grid_propagate(False)
             card.grid_columnconfigure(0, weight=1)
+
+            ctk.CTkFrame(
+                card,
+                height=4,
+                corner_radius=2,
+                fg_color=Colors.PRIMARY,
+            ).grid(
+                row=0,
+                column=0,
+                padx=12,
+                pady=(10, 8),
+                sticky="ew",
+            )
 
             ctk.CTkLabel(
                 card,
                 text=title,
                 anchor="w",
                 text_color=Colors.MUTED,
-                font=ctk.CTkFont(size=8, weight="bold"),
+                font=ctk.CTkFont(
+                    size=9,
+                    weight="bold",
+                ),
             ).grid(
-                row=0,
+                row=1,
                 column=0,
-                padx=13,
-                pady=(9, 0),
+                padx=14,
                 sticky="w",
             )
 
@@ -1392,29 +1426,22 @@ class DiagnosticApp(ctk.CTk):
                 text=initial,
                 anchor="w",
                 text_color=Colors.TEXT,
-                font=ctk.CTkFont(size=15, weight="bold"),
+                font=ctk.CTkFont(
+                    size=20,
+                    weight="bold",
+                ),
             )
             value_label.grid(
-                row=1,
-                column=0,
-                padx=13,
-                pady=(1, 0),
-                sticky="w",
-            )
-            setattr(self, attribute, value_label)
-
-            ctk.CTkLabel(
-                card,
-                text=detail,
-                anchor="w",
-                text_color=Colors.MUTED,
-                font=ctk.CTkFont(size=8),
-            ).grid(
                 row=2,
                 column=0,
-                padx=13,
-                pady=(0, 9),
+                padx=14,
+                pady=(3, 13),
                 sticky="w",
+            )
+            setattr(
+                self,
+                attribute,
+                value_label,
             )
 
         chart_container = ctk.CTkFrame(
@@ -1426,9 +1453,14 @@ class DiagnosticApp(ctk.CTk):
             column=0,
             sticky="ew",
         )
-        chart_container.grid_columnconfigure(0, weight=1)
+        chart_container.grid_columnconfigure(
+            0,
+            weight=1,
+        )
 
-        self.history_chart = HistoryChart(chart_container)
+        self.history_chart = HistoryChart(
+            chart_container
+        )
         self.history_chart.grid(
             row=0,
             column=0,
@@ -1444,69 +1476,6 @@ class DiagnosticApp(ctk.CTk):
             sticky="ew",
         )
         self.storage_history_chart.grid_remove()
-
-        info = ctk.CTkFrame(
-            body,
-            height=58,
-            corner_radius=14,
-            border_width=1,
-            border_color=Colors.BORDER,
-            fg_color=Colors.SURFACE_RAISED,
-        )
-        info.grid(
-            row=3,
-            column=0,
-            pady=(10, 0),
-            sticky="ew",
-        )
-        info.grid_propagate(False)
-        info.grid_columnconfigure(1, weight=1)
-
-        ctk.CTkFrame(
-            info,
-            width=4,
-            corner_radius=2,
-            fg_color=Colors.PRIMARY,
-        ).grid(
-            row=0,
-            column=0,
-            rowspan=2,
-            padx=(0, 13),
-            pady=11,
-            sticky="ns",
-        )
-
-        self.history_count_label = ctk.CTkLabel(
-            info,
-            text="Noch keine gespeicherten Diagnosen.",
-            anchor="w",
-            text_color=Colors.TEXT,
-            font=ctk.CTkFont(size=11, weight="bold"),
-        )
-        self.history_count_label.grid(
-            row=0,
-            column=1,
-            padx=(0, 14),
-            pady=(10, 0),
-            sticky="w",
-        )
-
-        ctk.CTkLabel(
-            info,
-            text=(
-                "Die Historie bleibt lokal auf diesem Windows-PC "
-                "und wird nach jeder Diagnose aktualisiert."
-            ),
-            anchor="w",
-            text_color=Colors.MUTED,
-            font=ctk.CTkFont(size=9),
-        ).grid(
-            row=1,
-            column=1,
-            padx=(0, 14),
-            pady=(0, 9),
-            sticky="w",
-        )
 
     def _show_history_view(self, value: str) -> None:
         if value == "Speicherbelegung":

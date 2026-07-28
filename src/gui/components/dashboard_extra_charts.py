@@ -223,14 +223,14 @@ class DiskUsageChart(BaseChart):
 
 
 class HistoryChart(BaseChart):
-    """Zeigt Statusverteilung und Problemtrend der letzten Scans."""
+    """Zeigt einen kompakten Trend der letzten Diagnosen."""
 
     def __init__(self, master) -> None:
         super().__init__(
             master,
             "Diagnoseverlauf",
-            "Statusverteilung und Problemtrend der letzten zehn Scans",
-            330,
+            "Entwicklung von stabilen Ergebnissen, Hinweisen und Handlungsbedarf",
+            350,
         )
         self.show_empty(
             "Nach mehreren Scans erscheint hier die Entwicklung."
@@ -243,115 +243,205 @@ class HistoryChart(BaseChart):
             )
             return
 
+        from matplotlib.ticker import MaxNLocator
+
         labels = [
-            self._label(str(record.get("created_at", "")))
+            self._label(
+                str(record.get("created_at", ""))
+            )
             for record in records
         ]
         positions = list(range(len(labels)))
 
-        values = {
-            status: [
-                int(
-                    record.get(
-                        "status_counts",
-                        {},
-                    ).get(status, 0)
-                )
-                for record in records
-            ]
-            for status in STATUS_ORDER
-        }
+        counts = [
+            record.get("status_counts", {})
+            for record in records
+        ]
+
+        stable = [
+            int(item.get("OK", 0))
+            for item in counts
+        ]
+        notes = [
+            int(item.get("INFO", 0))
+            + int(item.get("HINWEIS", 0))
+            for item in counts
+        ]
+        action = [
+            int(item.get("WARNUNG", 0))
+            + int(item.get("KRITISCH", 0))
+            + int(item.get("FEHLER", 0))
+            for item in counts
+        ]
 
         self.axes.clear()
         self.apply_theme()
 
-        bottom = [0] * len(labels)
-
-        for status in STATUS_ORDER:
-            series = values[status]
-
-            if not any(series):
-                continue
-
-            self.axes.bar(
-                positions,
-                series,
-                bottom=bottom,
-                width=0.66,
-                color=STATUS_COLORS[status],
-                label=STATUS_LABELS[status],
-                alpha=0.88,
-            )
-            bottom = [
-                current + addition
-                for current, addition in zip(bottom, series)
-            ]
-
-        problems = [
-            values["WARNUNG"][index]
-            + values["KRITISCH"][index]
-            + values["FEHLER"][index]
-            for index in range(len(labels))
-        ]
-
+        dark = ctk.get_appearance_mode() == "Dark"
         text_color = (
             "#F2F4F7"
-            if ctk.get_appearance_mode() == "Dark"
-            else "#101722"
+            if dark
+            else "#182230"
+        )
+        grid_color = (
+            "#405069"
+            if dark
+            else "#D8DEE8"
+        )
+
+        stable_color = "#55B5A5"
+        notes_color = "#7C93B8"
+        action_color = "#D5953F"
+        latest_color = (
+            "#4F86F7"
+            if dark
+            else "#2563EB"
+        )
+
+        self.axes.axvspan(
+            positions[-1] - 0.42,
+            positions[-1] + 0.42,
+            color=latest_color,
+            alpha=0.06,
+            zorder=0,
         )
 
         self.axes.plot(
             positions,
-            problems,
+            stable,
+            color=stable_color,
+            linewidth=2.4,
             marker="o",
             markersize=5,
-            linewidth=2.1,
-            color=text_color,
-            markerfacecolor="#FFFFFF",
-            markeredgecolor=text_color,
-            label="Probleme gesamt",
-            zorder=5,
+            label="Stabil",
+            zorder=3,
+        )
+        self.axes.plot(
+            positions,
+            notes,
+            color=notes_color,
+            linewidth=2.2,
+            marker="o",
+            markersize=5,
+            label="Info und Hinweise",
+            zorder=3,
+        )
+        self.axes.plot(
+            positions,
+            action,
+            color=action_color,
+            linewidth=2.6,
+            marker="o",
+            markersize=6,
+            label="Handlungsbedarf",
+            zorder=4,
+        )
+        self.axes.fill_between(
+            positions,
+            action,
+            0,
+            color=action_color,
+            alpha=0.08,
+            zorder=1,
         )
 
         self.axes.set_xticks(positions)
         self.axes.set_xticklabels(labels)
         self.axes.set_ylabel("Prüfungen")
+        self.axes.yaxis.set_major_locator(
+            MaxNLocator(integer=True)
+        )
         self.axes.grid(
             axis="y",
-            alpha=0.12,
+            color=grid_color,
+            alpha=0.16,
             linewidth=0.8,
         )
         self.axes.set_axisbelow(True)
-        self.axes.margins(x=0.025)
+        self.axes.margins(x=0.035)
+
+        upper = max(
+            stable
+            + notes
+            + action
+            + [1]
+        )
         self.axes.set_ylim(
             0,
-            max(bottom + problems + [1]) + 1,
+            upper + max(1, upper * 0.18),
         )
 
         self.axes.legend(
             loc="upper center",
-            bbox_to_anchor=(0.5, 1.17),
-            ncol=7,
+            bbox_to_anchor=(0.5, 1.15),
+            ncol=3,
             frameon=False,
-            fontsize=8,
+            fontsize=9,
             labelcolor=text_color,
-            handlelength=1.4,
-            columnspacing=1.0,
+            handlelength=1.8,
+            columnspacing=1.6,
         )
 
-        self.axes.annotate(
-            f"{problems[-1]} Probleme",
-            xy=(positions[-1], problems[-1]),
-            xytext=(-7, 12),
-            textcoords="offset points",
-            ha="right",
-            fontsize=8,
-            color=text_color,
+        last_values = (
+            (
+                stable[-1],
+                stable_color,
+                "Stabil",
+                12,
+            ),
+            (
+                notes[-1],
+                notes_color,
+                "Hinweise",
+                0,
+            ),
+            (
+                action[-1],
+                action_color,
+                "Bedarf",
+                -12,
+            ),
+        )
+
+        for value, color, label, offset in last_values:
+            self.axes.annotate(
+                f"{label} {value}",
+                xy=(positions[-1], value),
+                xytext=(-10, offset),
+                textcoords="offset points",
+                ha="right",
+                va="center",
+                fontsize=8,
+                fontweight="bold",
+                color=color,
+                bbox={
+                    "boxstyle": "round,pad=0.25",
+                    "facecolor": (
+                        "#202C3C"
+                        if dark
+                        else "#FFFFFF"
+                    ),
+                    "edgecolor": color,
+                    "linewidth": 0.7,
+                    "alpha": 0.95,
+                },
+            )
+
+        self.axes.text(
+            positions[-1],
+            -0.16,
+            "AKTUELL",
+            transform=self.axes.get_xaxis_transform(),
+            ha="center",
+            va="top",
+            fontsize=7,
+            fontweight="bold",
+            color=latest_color,
         )
 
         self.figure.tight_layout(
             pad=1.1,
-            rect=(0.01, 0.01, 0.99, 0.90),
+            rect=(0.01, 0.03, 0.99, 0.90),
         )
         self.canvas.draw_idle()
 
@@ -368,14 +458,14 @@ class HistoryChart(BaseChart):
 
 
 class StorageHistoryChart(BaseChart):
-    """Zeigt die Entwicklung von belegtem und freiem Speicher."""
+    """Zeigt eine moderne Speicherentwicklung."""
 
     def __init__(self, master) -> None:
         super().__init__(
             master,
-            "Verlauf der Speicherbelegung",
+            "Speicherentwicklung",
             "Belegter und freier Speicher der letzten zehn Scans",
-            330,
+            350,
         )
         self.show_empty(
             "Nach gespeicherten Diagnosen erscheint hier "
@@ -391,9 +481,15 @@ class StorageHistoryChart(BaseChart):
             if not isinstance(usage, dict):
                 continue
 
-            used = self._number(usage.get("used_gb"))
-            free = self._number(usage.get("free_gb"))
-            total = self._number(usage.get("total_gb"))
+            used = self._number(
+                usage.get("used_gb")
+            )
+            free = self._number(
+                usage.get("free_gb")
+            )
+            total = self._number(
+                usage.get("total_gb")
+            )
 
             if used is None or free is None:
                 continue
@@ -404,7 +500,12 @@ class StorageHistoryChart(BaseChart):
             points.append(
                 (
                     self._label(
-                        str(record.get("created_at", ""))
+                        str(
+                            record.get(
+                                "created_at",
+                                "",
+                            )
+                        )
                     ),
                     used,
                     free,
@@ -419,50 +520,95 @@ class StorageHistoryChart(BaseChart):
             )
             return
 
-        labels = [point[0] for point in points]
-        used_values = [point[1] for point in points]
-        free_values = [point[2] for point in points]
-        total_values = [point[3] for point in points]
+        labels = [
+            point[0]
+            for point in points
+        ]
+        used_values = [
+            point[1]
+            for point in points
+        ]
+        free_values = [
+            point[2]
+            for point in points
+        ]
+        total_values = [
+            point[3]
+            for point in points
+        ]
         positions = list(range(len(points)))
 
         self.axes.clear()
         self.apply_theme()
 
+        dark = ctk.get_appearance_mode() == "Dark"
+        text_color = (
+            "#F2F4F7"
+            if dark
+            else "#182230"
+        )
+        grid_color = (
+            "#405069"
+            if dark
+            else "#D8DEE8"
+        )
+        used_color = "#5B8DEF"
+        free_color = "#55B5A5"
+        total_color = (
+            "#A3AFBF"
+            if dark
+            else "#667085"
+        )
+        latest_color = (
+            "#4F86F7"
+            if dark
+            else "#2563EB"
+        )
+
+        self.axes.axvspan(
+            positions[-1] - 0.42,
+            positions[-1] + 0.42,
+            color=latest_color,
+            alpha=0.06,
+            zorder=0,
+        )
+
         self.axes.plot(
             positions,
             used_values,
-            color="#5B8DEF",
+            color=used_color,
             marker="o",
-            linewidth=2.3,
+            linewidth=2.6,
             markersize=5,
             label="Belegt",
+            zorder=4,
         )
         self.axes.fill_between(
             positions,
             used_values,
-            color="#5B8DEF",
-            alpha=0.10,
+            0,
+            color=used_color,
+            alpha=0.08,
+            zorder=1,
         )
         self.axes.plot(
             positions,
             free_values,
-            color="#55B5A5",
+            color=free_color,
             marker="o",
-            linewidth=2.1,
+            linewidth=2.4,
             markersize=5,
             label="Frei",
+            zorder=3,
         )
         self.axes.plot(
             positions,
             total_values,
-            color=(
-                "#A3AFBF"
-                if ctk.get_appearance_mode() == "Dark"
-                else "#667085"
-            ),
+            color=total_color,
             linestyle="--",
-            linewidth=1.3,
+            linewidth=1.4,
             label="Gesamt",
+            zorder=2,
         )
 
         self.axes.set_xticks(positions)
@@ -470,39 +616,78 @@ class StorageHistoryChart(BaseChart):
         self.axes.set_ylabel("Gigabyte")
         self.axes.grid(
             axis="y",
-            alpha=0.12,
+            color=grid_color,
+            alpha=0.16,
             linewidth=0.8,
         )
         self.axes.set_axisbelow(True)
-        self.axes.margins(x=0.03, y=0.15)
+        self.axes.margins(x=0.035, y=0.15)
 
-        text_color = (
-            "#F2F4F7"
-            if ctk.get_appearance_mode() == "Dark"
-            else "#101722"
-        )
         self.axes.legend(
             loc="upper center",
-            bbox_to_anchor=(0.5, 1.16),
+            bbox_to_anchor=(0.5, 1.15),
             ncol=3,
             frameon=False,
             fontsize=9,
             labelcolor=text_color,
+            handlelength=1.8,
+            columnspacing=1.6,
         )
 
-        self.axes.annotate(
-            f"{used_values[-1]:.1f} GB belegt",
-            xy=(positions[-1], used_values[-1]),
-            xytext=(-8, 12),
-            textcoords="offset points",
-            ha="right",
-            fontsize=8,
-            color=text_color,
+        annotations = (
+            (
+                used_values[-1],
+                used_color,
+                f"Belegt {used_values[-1]:.1f} GB",
+                12,
+            ),
+            (
+                free_values[-1],
+                free_color,
+                f"Frei {free_values[-1]:.1f} GB",
+                -12,
+            ),
+        )
+
+        for value, color, label, offset in annotations:
+            self.axes.annotate(
+                label,
+                xy=(positions[-1], value),
+                xytext=(-10, offset),
+                textcoords="offset points",
+                ha="right",
+                va="center",
+                fontsize=8,
+                fontweight="bold",
+                color=color,
+                bbox={
+                    "boxstyle": "round,pad=0.25",
+                    "facecolor": (
+                        "#202C3C"
+                        if dark
+                        else "#FFFFFF"
+                    ),
+                    "edgecolor": color,
+                    "linewidth": 0.7,
+                    "alpha": 0.95,
+                },
+            )
+
+        self.axes.text(
+            positions[-1],
+            -0.16,
+            "AKTUELL",
+            transform=self.axes.get_xaxis_transform(),
+            ha="center",
+            va="top",
+            fontsize=7,
+            fontweight="bold",
+            color=latest_color,
         )
 
         self.figure.tight_layout(
             pad=1.1,
-            rect=(0.01, 0.01, 0.99, 0.90),
+            rect=(0.01, 0.03, 0.99, 0.90),
         )
         self.canvas.draw_idle()
 
@@ -512,7 +697,9 @@ class StorageHistoryChart(BaseChart):
             return None
 
         try:
-            return float(str(value).replace(",", "."))
+            return float(
+                str(value).replace(",", ".")
+            )
         except ValueError:
             return None
 
