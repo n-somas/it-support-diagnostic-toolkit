@@ -22,6 +22,7 @@ from src.gui.components.dashboard_extra_charts import (
 )
 from src.gui.result_card import ResultCard
 from src.gui.hardware_page import HardwarePage
+from src.gui.network_page import NetworkPage
 from src.gui.theme import Colors, STATUS_COLORS
 from src.report.markdown_report import save_markdown_report
 from src.services.scan_history_service import ScanHistoryService
@@ -62,6 +63,10 @@ PAGE_TITLES = {
     "results": (
         "Diagnoseergebnisse",
         "Prüfbereiche filtern und Details gezielt öffnen",
+    ),
+    "network": (
+        "Netzwerk",
+        "Adapter, IP-Konfiguration und Verbindungsqualität",
     ),
     "hardware": (
         "Hardware und Updates",
@@ -166,6 +171,7 @@ class DiagnosticApp(ctk.CTk):
         self._create_page_container()
         self._create_dashboard_page()
         self._create_results_page()
+        self._create_network_page()
         self._create_hardware_page()
         self._create_history_page()
         self._create_comparison_page()
@@ -181,7 +187,7 @@ class DiagnosticApp(ctk.CTk):
         self.sidebar.grid(row=0, column=0, sticky="nsew")
         self.sidebar.grid_propagate(False)
         self.sidebar.grid_columnconfigure(0, weight=1)
-        self.sidebar.grid_rowconfigure(7, weight=1)
+        self.sidebar.grid_rowconfigure(8, weight=1)
 
         brand = ctk.CTkFrame(
             self.sidebar,
@@ -244,6 +250,7 @@ class DiagnosticApp(ctk.CTk):
         nav_entries = (
             ("dashboard", "◈  Übersicht"),
             ("results", "✓  Ergebnisse"),
+            ("network", "◎  Netzwerk"),
             ("hardware", "▦  Hardware & Updates"),
             ("history", "↔  Verlauf & Vergleich"),
             ("reports", "▤  Berichte"),
@@ -271,7 +278,7 @@ class DiagnosticApp(ctk.CTk):
             anchor="w",
             text_color="#728096",
             font=ctk.CTkFont(size=10, weight="bold"),
-        ).grid(row=8, column=0, padx=22, pady=(12, 7), sticky="ew")
+        ).grid(row=9, column=0, padx=22, pady=(12, 7), sticky="ew")
 
         self.appearance_menu = ctk.CTkOptionMenu(
             self.sidebar,
@@ -284,7 +291,7 @@ class DiagnosticApp(ctk.CTk):
             button_hover_color=Colors.PRIMARY_HOVER,
             text_color="#F2F4F7",
         )
-        self.appearance_menu.grid(row=9, column=0, padx=14, sticky="ew")
+        self.appearance_menu.grid(row=10, column=0, padx=14, sticky="ew")
         self.appearance_menu.set("Hell")
 
         ctk.CTkLabel(
@@ -294,7 +301,7 @@ class DiagnosticApp(ctk.CTk):
             anchor="w",
             text_color="#728096",
             font=ctk.CTkFont(size=10),
-        ).grid(row=10, column=0, padx=20, pady=18, sticky="sw")
+        ).grid(row=11, column=0, padx=20, pady=18, sticky="sw")
 
     def _create_page_container(self) -> None:
         self.page_container = ctk.CTkFrame(
@@ -1197,6 +1204,22 @@ class DiagnosticApp(ctk.CTk):
         self._update_filter_buttons()
 
 
+    def _create_network_page(self) -> None:
+        page = self._new_page("network")
+        self._create_page_header(
+            page,
+            "network",
+            action_text="Neu prüfen",
+            action_command=self._start_scan,
+        )
+
+        self.network_page = NetworkPage(page)
+        self.network_page.grid(
+            row=1,
+            column=0,
+            sticky="nsew",
+        )
+
     def _create_hardware_page(self) -> None:
         page = self._new_page("hardware")
         self._create_page_header(page, "hardware")
@@ -1599,6 +1622,7 @@ class DiagnosticApp(ctk.CTk):
             "nach Abschluss."
         )
         self._reset_summary_dashboard()
+        self.network_page.reset()
         self.hardware_page.reset()
         self._reset_action_center()
 
@@ -1740,6 +1764,7 @@ class DiagnosticApp(ctk.CTk):
         self.active_status_filter = None
         self._update_filter_buttons()
         self._display_results(results)
+        self.network_page.update_from_results(results)
         self.hardware_page.update_from_results(results)
 
         try:
