@@ -1,8 +1,8 @@
-﻿# IT Support Diagnostic Toolkit
+# IT Support Diagnostic Toolkit
 
-Eine lokale Windows-Diagnoseanwendung zur automatisierten Prüfung typischer Support-, Hardware-, Netzwerk- und Sicherheitsbereiche.
+A local Windows desktop application for automated IT support diagnostics across system, hardware, network, update, and security-related areas.
 
-![Übersicht nach abgeschlossener Diagnose](docs/images/results.png)
+![Diagnostic results dashboard](docs/images/results.png)
 
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011-0078D4)
@@ -10,162 +10,198 @@ Eine lokale Windows-Diagnoseanwendung zur automatisierten Prüfung typischer Sup
 ![Charts](https://img.shields.io/badge/Charts-Matplotlib-11557C)
 ![Status](https://img.shields.io/badge/Status-Active%20Development-orange)
 
-## Überblick
+## Overview
 
-Das IT Support Diagnostic Toolkit bündelt mehrere Windows-Prüfungen in einer grafischen Desktopanwendung. Es erfasst System-, Hardware-, Netzwerk- und Sicherheitsinformationen, bewertet die Ergebnisse automatisch und zeigt möglichen Handlungsbedarf übersichtlich an.
+The **IT Support Diagnostic Toolkit** combines common Windows troubleshooting tasks in a single graphical desktop application.
 
-Die Anwendung arbeitet lokal auf dem Windows-PC. Diagnosedaten werden nicht automatisch an externe Dienste übertragen. Ergebnisse können gefiltert, im Detail geprüft, als Markdown-Bericht gespeichert und mit früheren Diagnoseläufen verglichen werden.
+It collects and evaluates system, hardware, network, Windows Update, service, event-log, startup, firewall, Defender, BitLocker, port, and storage information. Results are automatically classified and presented through an interactive dashboard so that potential support issues can be identified quickly.
 
-Das Projekt wurde als praxisnahes Portfolio-Projekt für IT-Support, Systemadministration und Cybersecurity-Grundlagen entwickelt.
+All diagnostic processing takes place locally. Diagnostic information is not automatically transmitted to external services.
 
-## Hauptfunktionen
+The project was developed as a practical portfolio application for **IT Support, Windows Administration, System Diagnostics, and Security Operations fundamentals**.
 
-- moderne Windows-Oberfläche mit fester Seitenleiste
-- automatisierte Prüfung von System-, Netzwerk- und Sicherheitsbereichen
-- Analyse aktiver Netzwerkadapter, IP-Konfiguration, Paketverlust und Latenz
-- Prüfung ausgewählter Windows-Dienste mit kontextbezogener Bewertung
-- datenschutzfreundliche Auswertung kritischer und fehlerhafter Windows-Ereignisse
-- Analyse von Windows-Autostartprogrammen mit Signatur-, Pfad- und Befehlsprüfung
-- Hardwareinventarisierung für CPU, RAM, GPU, Mainboard, BIOS, Laufwerke und Netzwerkadapter
-- Prüfung auf Geräte mit auffälligem Status
-- Erkennung verfügbarer Windows- und Treiberupdates
-- Erkennung eines ausstehenden Neustarts
-- direkter Zugang zu Windows Update und optionalen Updates
-- Statusmodell mit OK, Info, Hinweis, Warnung, Kritisch und Fehler
-- kompaktes Aktionszentrum für aktuelle Probleme
-- vollständig anklickbare Problemkarten
-- filterbare Diagnoseergebnisse mit strukturierter Detailansicht
-- Diagramme für Statusverteilung, aktuelle Speicherbelegung und Speicherverlauf
-- lokale Scan-Historie
-- integrierter Vergleich zweier Diagnoseläufe
-- intelligente Bewertung technischer Veränderungen
-- professioneller Markdown-Vergleichsbericht
-- automatischer Supportbericht für einen einzelnen Diagnoselauf
-- eigenständiger Windows-EXE-Build mit PyInstaller
-- versteckte Ausführung externer Windows- und PowerShell-Prozesse
+## Key Features
+
+* Automated Windows system diagnostics
+* Hardware inventory
+* Network configuration and connectivity analysis
+* Windows Firewall and Microsoft Defender checks
+* Windows Update and driver-update detection
+* Pending reboot detection
+* Windows service diagnostics
+* Privacy-conscious Windows Event Log analysis
+* Startup-program inspection
+* Local listening-port analysis
+* BitLocker status detection
+* Device health checks
+* Interactive issue cards
+* Filterable diagnostic results
+* Scan history
+* Comparison of two diagnostic runs
+* Markdown support reports
+* Diagnostic comparison reports
+* Status and storage charts
+* Standalone Windows executable build with PyInstaller
 
 ## Screenshots
 
-### Startansicht
+### Start Screen
 
-Vor dem ersten Diagnoselauf zeigt die Anwendung den zentralen Startbereich, die noch leeren Statuskarten und die vorbereiteten Diagrammbereiche.
+![Application start screen](docs/images/start-screen.png)
 
-![Startansicht der Anwendung](docs/images/start-screen.png)
+### Diagnostic Dashboard
 
-### Übersicht nach der Diagnose
+![Diagnostic results dashboard](docs/images/results.png)
 
-Nach einer abgeschlossenen Prüfung werden Statuswerte, aktueller Handlungsbedarf, Statusverteilung und Speicherbelegung dargestellt. Die Problemkarten können direkt angeklickt werden.
+### Hardware and Updates
 
-![Übersicht nach abgeschlossener Diagnose](docs/images/results.png)
+![Hardware inventory and update status](docs/images/hardware-updates.png)
 
-### Hardware und Updates
+### Scan History
 
-Die Hardwareübersicht zeigt Prozessor, Arbeitsspeicher, Grafikkarten, Mainboard, BIOS und den aktuellen Updatebedarf. Windows Update und optionale Treiberupdates können direkt geöffnet werden.
+![Diagnostic history](docs/images/history.png)
 
-![Hardwareinventar und Update-Status](docs/images/hardware-updates.png)
+### Diagnostic Comparison
 
-### Diagnoseverlauf
+![Comparison of two diagnostic scans](docs/images/comparison.png)
 
-Gespeicherte Diagnoseläufe werden als zeitlicher Verlauf dargestellt. Neben der Statusentwicklung lässt sich die belegte und freie Speicherkapazität von Laufwerk C: über mehrere Scans nachvollziehen.
+## Diagnostic Modules
 
-![Verlauf gespeicherter Diagnoseläufe](docs/images/history.png)
+| Module              | Description                                                                          |
+| ------------------- | ------------------------------------------------------------------------------------ |
+| System Information  | Hostname, user, operating system, architecture, and basic system information         |
+| Hardware Inventory  | CPU, memory, GPU, motherboard, BIOS, drives, and network adapters                    |
+| Device Status       | Detects devices reporting abnormal or failed states                                  |
+| Network Diagnostics | Active adapters, DHCP, IPv4, gateway, DNS, network profile, packet loss, and latency |
+| Storage             | Total, used, and available disk capacity with automatic evaluation                   |
+| Windows Firewall    | Domain, private, and public firewall profiles                                        |
+| Microsoft Defender  | Antivirus and real-time protection status, signatures, and protection information    |
+| Windows Update      | Available Windows and driver updates, last installed update, and reboot requirements |
+| Windows Services    | State and startup configuration of selected support and network services             |
+| Windows Events      | Critical and error events from System and Application logs                           |
+| Startup Programs    | Startup commands, executable paths, signatures, and suspicious startup mechanisms    |
+| Open Ports          | Local TCP listening ports and associated processes                                   |
+| BitLocker           | Encryption and protection state of the system drive                                  |
+| Scan History        | Local storage of previous diagnostic runs                                            |
+| Scan Comparison     | Comparison of status values and technical measurements                               |
+| Reports             | Markdown support and comparison reports                                              |
 
-### Windows-Ereignisauswertung
+## Status Model
 
-Die Anwendung analysiert kritische und fehlerhafte Ereignisse aus den
-Windows-Protokollen `System` und `Application` innerhalb der letzten
-24 Stunden. Wiederholte Ereignisse werden nach Quelle und Ereignis-ID
-gruppiert. Unerwartete Neustarts, Bugchecks, Datenträger- und
-Hardwarefehler, Anwendungsabstürze sowie Dienstfehler werden gesondert
-bewertet.
+Diagnostic checks are classified into six states:
 
-Aus Datenschutzgründen übernimmt die Anwendung keine vollständigen
-Ereignismeldungen. Gespeichert werden nur Protokoll, Quelle,
-Ereignis-ID, Ebene, Zeitpunkt und Häufigkeit.
+| Status   | Meaning                                               |
+| -------- | ----------------------------------------------------- |
+| OK       | Check completed without detected issues               |
+| Info     | Informational system data                             |
+| Notice   | Information or anomaly that should be reviewed        |
+| Warning  | Potential action required                             |
+| Critical | Urgent action required                                |
+| Error    | The diagnostic check could not be completed correctly |
 
-## Diagnosevergleich
+Interactive status and issue cards link directly to the corresponding diagnostic results.
 
-Zwei gespeicherte Diagnoseläufe können innerhalb der Hauptanwendung verglichen werden. Statusänderungen und veränderte Detailwerte werden getrennt dargestellt.
+## Windows Event Analysis
 
-![Integrierter Vergleich zweier Diagnoseläufe](docs/images/comparison.png)
+The toolkit evaluates critical and error events from the Windows `System` and `Application` logs within the previous 24 hours.
 
-Berichte können als Markdown-Dateien erstellt und exportiert werden. Auf einen Berichtsscreenshot wird bewusst verzichtet, da Diagnoseberichte sensible Systeminformationen enthalten können.
+Repeated events are grouped by source and event ID. The evaluation highlights categories such as:
 
-## Diagnosebereiche
+* unexpected shutdowns
+* bugchecks
+* disk-related errors
+* hardware errors
+* application crashes
+* service failures
 
-| Bereich | Beschreibung |
-|---|---|
-| Systeminformationen | Computername, Benutzername, Betriebssystem, Architektur und grundlegende Systemdaten |
-| Hardwareinventar | Prozessor, Arbeitsspeicher, Grafikkarten, Mainboard, BIOS, Laufwerke und Netzwerkadapter |
-| Gerätestatus | Erkennung vorhandener Geräte mit auffälligem oder fehlerhaftem Status |
-| Netzwerkprüfung | Aktive physische und virtuelle Adapter, Link-Geschwindigkeit, DHCP, IPv4, Gateway, DNS, Netzwerkprofil, Paketverlust und Latenz |
-| Speicherplatzprüfung | Gesamt-, belegter und freier Speicherplatz mit automatischer Bewertung |
-| Firewallprüfung | Status der Windows-Firewall für Domänen-, private und öffentliche Profile |
-| Defenderprüfung | Echtzeitschutz, Antivirus-Status, Signaturinformationen und Schutzstatus |
-| Windows Update | Verfügbare Windows- und Treiberupdates, letztes installiertes Update und Neustartbedarf |
-| Windows-Dienste | Status und Starttyp ausgewählter Support-, Netzwerk- und Wartungsdienste |
-| Windows-Ereignisse | Kritische und fehlerhafte Ereignisse aus System und Application mit Gruppierung, Bewertung und Handlungsempfehlungen |
-| Autostartprogramme | Startbefehle, Zieldateien, digitale Signaturen und auffällige Startmechanismen |
-| Offene Ports | Lokale TCP-Listening-Ports, zugehörige Prozesse und auffällige Standardports |
-| BitLocker | Verschlüsselungsstatus, Schutzstatus und Verschlüsselungsgrad von Laufwerk C: |
-| Scan-Historie | Lokale Speicherung vergangener Diagnosen |
-| Diagnosevergleich | Vergleich von Statuswerten und einzelnen technischen Messwerten |
-| Berichte | Erstellung von Support- und Vergleichsberichten im Markdown-Format |
+For privacy reasons, full event messages are not stored in diagnostic history. Only metadata such as log name, source, event ID, severity, timestamp, and occurrence count is retained.
 
-## Statusbewertung
+## Hardware and Update Diagnostics
 
-| Status | Bedeutung |
-|---|---|
-| OK | Prüfung ohne Auffälligkeit abgeschlossen |
-| Info | Informative Systemangabe ohne Handlungsbedarf |
-| Hinweis | Information oder Auffälligkeit, die geprüft werden sollte |
-| Warnung | Möglicher Handlungsbedarf |
-| Kritisch | Dringender Handlungsbedarf |
-| Fehler | Prüfung konnte nicht korrekt ausgeführt werden |
+Hardware information is collected through local Windows interfaces and PowerShell/CIM queries.
 
-Die Statuskarten und Problemkarten sind interaktiv. Ein Klick führt direkt zu den gefilterten Ergebnissen oder zur vollständigen Detailansicht.
+The inventory includes:
 
-## Hardware- und Updatefunktionen
+* system manufacturer and model
+* processor and core information
+* installed memory and RAM modules
+* GPU and driver information
+* motherboard
+* BIOS version and date
+* physical drives and reported state
+* active network adapters
+* devices with abnormal status
 
-Die Hardwareinventarisierung verwendet lokale Windows-Schnittstellen und PowerShell-Abfragen. Dabei werden unter anderem folgende Informationen erfasst:
+The update module checks for:
 
-- Hersteller und Modell des PCs
-- Prozessor und Kernanzahl
-- installierter Arbeitsspeicher und einzelne RAM-Module
-- Grafikkarten und Treiberversionen
-- Mainboard sowie BIOS-Version und BIOS-Datum
-- physische Laufwerke und gemeldeter Zustand
-- aktive Netzwerkadapter
-- Geräte mit auffälligem Status
+* available Windows updates
+* available driver updates
+* the most recently installed update
+* Windows Update service status
+* pending reboot state
 
-Die Updateprüfung kontrolliert:
+The application does **not** install updates automatically. It opens the appropriate Windows settings page so that installation remains under user control.
 
-- verfügbare Windows-Updates
-- verfügbare Treiberupdates
-- letztes installiertes Update
-- Status des Windows-Update-Dienstes
-- erforderlichen Neustart
+## Diagnostic History and Comparison
 
-Die Anwendung installiert keine Updates automatisch. Die Schaltflächen öffnen die passenden Windows-Einstellungen, in denen Installation und Neustart vom Benutzer bestätigt werden.
+Diagnostic runs can be stored locally and compared inside the application.
 
-## Diagnosevergleich
+Changes are categorized as:
 
-Gespeicherte Diagnoseläufe können direkt innerhalb der Hauptanwendung verglichen werden. Der Vergleich unterscheidet zwischen:
+* improved
+* unchanged
+* degraded
+* newly detected
+* no longer present
 
-- verbessert
-- unverändert
-- verschlechtert
-- neu hinzugekommen
-- nicht mehr vorhanden
+Individual technical values can also be compared. Expected changes such as Defender signature updates, changing DNS addresses, or minor storage fluctuations are treated separately to avoid presenting normal system changes as major incidents.
 
-Zusätzlich werden einzelne Detailwerte verglichen. Typische Systemschwankungen wie Defender-Signaturupdates, wechselnde DNS-Adressen oder geringe Speicheränderungen werden fachlich eingeordnet, damit normale Veränderungen nicht wie schwerwiegende Probleme wirken.
+## Architecture
 
-## Voraussetzungen
+```text
+Windows System
+      |
+      v
+Diagnostic Modules
+      |
+      v
+Diagnostic Runner
+      |
+      +--> Evaluation and Status Logic
+      |
+      +--> Scan History
+      |
+      +--> Report Generation
+      |
+      v
+CustomTkinter Desktop UI
+      |
+      +--> Dashboard
+      +--> Hardware View
+      +--> History
+      +--> Comparison
+```
 
-- Windows 10 oder Windows 11
-- Python 3.12 oder neuer
-- PowerShell
-- Git
+PowerShell and Windows-native interfaces are used where Python alone does not expose the required system information.
+
+## Tech Stack
+
+* Python 3.12
+* CustomTkinter
+* Matplotlib
+* PowerShell
+* Windows CIM / WMI
+* JSON
+* Markdown
+* PyInstaller
+* Git and GitHub
+
+## Requirements
+
+* Windows 10 or Windows 11
+* Python 3.12 or newer
+* PowerShell
+* Git
 
 ## Installation
 
@@ -179,45 +215,53 @@ python -m venv .venv
 python -m pip install -r requirements.txt
 ```
 
-## Anwendung starten
+## Run the Application
 
 ```powershell
 python -m src.gui.app
 ```
 
-## Windows-EXE erstellen
+## Build the Windows Executable
 
 ```powershell
 .\build_exe.ps1
 ```
 
-Die fertige Anwendung befindet sich anschließend unter:
+The executable is created under:
 
 ```text
 dist\IT-Support-Diagnostic-Toolkit.exe
 ```
 
-## Berichte
+## Reports
 
-Nach einer abgeschlossenen Diagnose wird automatisch ein Markdown-Bericht erzeugt:
+After a diagnostic run, a Markdown support report is generated:
 
 ```text
 reports\support_report.md
 ```
 
-Zusätzlich kann aus dem integrierten Diagnosevergleich ein professioneller Vergleichsbericht exportiert werden.
+A separate comparison report can also be exported from the integrated diagnostic comparison view.
 
-## Scan-Historie
+## Local Scan History
 
-Diagnoseläufe werden lokal als JSON-Dateien gespeichert:
+Previous diagnostic runs are stored as JSON files under:
 
 ```text
 data\scans
 ```
 
-Die gespeicherten Daten werden für den Diagnoseverlauf, den Verlauf der Speicherbelegung und den Vergleich zweier Scans verwendet.
+These files are used for historical charts and scan comparisons.
 
-## Projektstruktur
+## Privacy
+
+The application reads local system, hardware, network, and security information.
+
+Reports, screenshots, and diagnostic files may contain system-specific information and should therefore be reviewed and anonymized before publication or sharing.
+
+The toolkit does not automatically transmit diagnostic data to external services.
+
+## Project Structure
 
 ```text
 it-support-diagnostic-toolkit/
@@ -233,11 +277,6 @@ it-support-diagnostic-toolkit/
 │   └── diagnostic_runner.py
 ├── docs/
 │   └── images/
-│       ├── start-screen.png
-│       ├── results.png
-│       ├── hardware-updates.png
-│       ├── history.png
-│       └── comparison.png
 ├── data/
 │   └── scans/
 ├── reports/
@@ -246,36 +285,15 @@ it-support-diagnostic-toolkit/
 └── README.md
 ```
 
-## Datenschutz
-
-Die Anwendung liest lokale System-, Hardware-, Netzwerk- und Sicherheitsinformationen aus. Berichte, Screenshots und Scan-Dateien sollten vor einer Veröffentlichung geprüft und bei Bedarf anonymisiert werden.
-
-Das Tool überträgt keine Diagnosedaten automatisch an externe Dienste.
-
-## Technische Schwerpunkte
-
-- Python
-- CustomTkinter
-- Matplotlib
-- PowerShell-Aufrufe aus Python
-- Windows Management Instrumentation und CIM
-- Windows-Systemdiagnose
-- Hintergrund-Threads
-- JSON-Datenhaltung
-- Markdown-Berichte
-- PyInstaller
-- Git und GitHub
-
 ## Roadmap
 
-- HTML- und PDF-Berichte
-- aktivierbare Diagnosemodule
-- Export und Import der Scan-Historie
-- optionaler Herstellerabgleich für BIOS- und Treiberversionen
+* HTML and PDF reports
+* Optional diagnostic modules
+* Scan-history export and import
+* Optional manufacturer lookups for BIOS and driver versions
 
-## Projektstatus
+## Project Status
 
-**Funktionsfähige Windows-Desktopanwendung mit mehreren Diagnosemodulen, Hardwareinventar, grafischem Dashboard, interaktiven Problemkarten, Updateprüfung, Scan-Historie, integriertem Diagnosevergleich, Markdown-Berichten und EXE-Build.**
+**Functional Windows desktop application with multiple diagnostic modules, hardware inventory, update detection, interactive dashboards, scan history, diagnostic comparison, Markdown reports, and standalone EXE packaging.**
 
-Das Projekt wird schrittweise weiterentwickelt.
-
+The project is under active development.
